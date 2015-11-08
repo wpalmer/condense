@@ -91,11 +91,34 @@ func merge(a map[string]interface{}, b map[string]interface{}) {
 }
 
 func (t *Template) Merge(o *Template) {
+	if o.Metadata != nil && t.Metadata == nil {
+		t.Metadata = make(map[string]interface{})
+	}
 	merge(t.Metadata, o.Metadata)
+
+	if o.Parameters != nil && t.Parameters == nil {
+		t.Parameters = make(map[string]interface{})
+	}
 	merge(t.Parameters, o.Parameters)
+
+	if o.Mappings != nil && t.Mappings == nil {
+		t.Mappings = make(map[string]interface{})
+	}
 	merge(t.Mappings, o.Mappings)
+
+	if o.Conditions != nil && t.Conditions == nil {
+		t.Conditions = make(map[string]interface{})
+	}
 	merge(t.Conditions, o.Conditions)
+
+	if o.Resources != nil && t.Resources == nil {
+		t.Resources = make(map[string]interface{})
+	}
 	merge(t.Resources, o.Resources)
+
+	if o.Outputs != nil && t.Outputs == nil {
+		t.Outputs = make(map[string]interface{})
+	}
 	merge(t.Outputs, o.Outputs)
 }
 
