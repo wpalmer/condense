@@ -155,6 +155,7 @@ func walk(p interface{}, v Visitor) interface{} {
 	case string:
 	case bool:
 	case int:
+	case float64:
 	}
 
 	return v(p)
