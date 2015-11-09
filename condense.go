@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"inputs"
 )
 
 type Template struct {
@@ -245,21 +246,21 @@ func NewRefish(p map[string]interface{}) *Refish {
 	panic("non-Refish passed to NewRefish")
 }
 
-func (r *Refish) Lead(inputs Inputs) string {
+func (r *Refish) Lead(in inputs.Inputs) string {
 	lead := r.path[0]
 	aliasKey := fmt.Sprintf("%s.", lead)
 
-	if alias, ok := inputs.Get([]string{aliasKey}); ok {
+	if alias, ok := in.Get([]string{aliasKey}); ok {
 		return alias.(string)
 	}
 
 	return lead
 }
 
-func (r *Refish) Path(inputs Inputs) []string {
+func (r *Refish) Path(in inputs.Inputs) []string {
 	var path []string
 
-	path = append(path, r.Lead(inputs))
+	path = append(path, r.Lead(in))
 	for _, part := range r.path[1:] {
 		path = append(path, part)
 	}
@@ -267,54 +268,16 @@ func (r *Refish) Path(inputs Inputs) []string {
 	return path
 }
 
-func (r *Refish) Map(inputs Inputs) map[string]interface{} {
+func (r *Refish) Map(in inputs.Inputs) map[string]interface{} {
 	if r.Type == Ref {
 		return map[string]interface{}{
-			"Ref": r.Lead(inputs),
+			"Ref": r.Lead(in),
 		}
 	}
 
 	return map[string]interface{}{
-		"Fn::GetAtt": r.Path(inputs),
+		"Fn::GetAtt": r.Path(in),
 	}
-}
-
-type Inputs map[string]interface{}
-
-func NewInputs(raw map[string]interface{}) *Inputs {
-	inputs := Inputs(raw)
-	return &inputs
-}
-
-func (inputs *Inputs) Map() map[string]interface{} {
-	return map[string]interface{}(*inputs)
-}
-
-func (inputs *Inputs) Merge(other *Inputs) {
-	merge(map[string]interface{}(*inputs), map[string]interface{}(*other))
-}
-
-// Note: intentionally does not handle lookup-by-array-index
-func (inputs *Inputs) Get(path []string) (interface{}, bool) {
-	var ok bool
-	var p map[string]interface{}
-
-	next := interface{}(inputs.Map())
-	for _, part := range path {
-		p, ok = next.(map[string]interface{})
-		if !ok {
-			// "next" was not something we could use for mapping
-			return nil, false
-		}
-
-		next, ok = p[part]
-		if !ok {
-			// "p" did not contain a [part] key
-			return nil, false
-		}
-	}
-
-	return next, true
 }
 
 func getComponent(name string) (*Template, bool) {
@@ -364,8 +327,8 @@ func main() {
 	idec := json.NewDecoder(inputStream)
 
 	var t Template
-	var inputs Inputs
-	if err := idec.Decode(&inputs); err != nil {
+	var in inputs.Inputs
+	if err := idec.Decode(&in); err != nil {
 		panic(err)
 	}
 
@@ -387,47 +350,47 @@ func main() {
 				}
 
 				r := NewRefish(p)
-				if t.IsReffable(r.Lead(inputs)) {
+				if t.IsReffable(r.Lead(in)) {
 					return p
 				}
 
-				value, ok := inputs.Get(r.Path(inputs))
+				value, ok := in.Get(r.Path(in))
 				if ok {
 					// existed in inputs: return that
 					return value
 				}
 
 				// search for a component to Include
-				component, ok := getComponent(r.Lead(inputs))
+				component, ok := getComponent(r.Lead(in))
 				if ok {
 					t.Merge(component)
 					pending = pending + 1
-					if t.IsReffable(r.Lead(inputs)) {
+					if t.IsReffable(r.Lead(in)) {
 						// after merging in the Include, everything was okay
-						return r.Map(inputs)
+						return r.Map(in)
 					}
 
 					panic(fmt.Sprintf(
 						"Including %s component did not result in %s being reffable",
-						r.Lead(inputs), r.Lead(inputs),
+						r.Lead(in), r.Lead(in),
 					))
 				}
 
-				outputs, ok := getStackOutputs(r.Lead(inputs))
+				outputs, ok := getStackOutputs(r.Lead(in))
 				if ok {
 					outputsMap := map[string]interface{}{}
-					outputsMap[r.Lead(inputs)] = map[string]interface{}{
+					outputsMap[r.Lead(in)] = map[string]interface{}{
 						"Outputs": outputs,
 					}
-					inputs.Merge(NewInputs(outputsMap))
+					in.Attach(r.Lead(in), inputs.NewInputs(outputsMap))
 
-					if value, ok := inputs.Get(r.Path(inputs)); ok {
+					if value, ok := in.Get(r.Path(in)); ok {
 						return value
 					} else {
 						panic(fmt.Sprintf(
 							"Unknown value for %v even after Merging in Stack Outputs for %s",
-							r.Path(inputs),
-							r.Lead(inputs),
+							r.Path(in),
+							r.Lead(in),
 						))
 					}
 				}
