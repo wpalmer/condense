@@ -146,6 +146,10 @@ func walk(p interface{}, v Visitor) interface{} {
 		}
 	case map[string]interface{}:
 		for k, value := range p {
+			if k == "$comment" {
+				continue
+			}
+
 			p[k] = walk(value, v)
 		}
 	case string:
