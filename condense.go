@@ -132,6 +132,11 @@ func walk(p interface{}, v Visitor) interface{} {
 		if len(p.Parameters) > 0 {
 			p.Parameters = walk(p.Parameters, v).(map[string]interface{})
 		}
+
+		if len(p.Conditions) > 0 {
+			p.Conditions = walk(p.Conditions, v).(map[string]interface{})
+		}
+
 		if len(p.Resources) > 0 {
 			p.Resources = walk(p.Resources, v).(map[string]interface{})
 		}
