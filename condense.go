@@ -77,6 +77,10 @@ func (t *Template) Reffables() map[string]ReffableType {
 }
 
 func (t *Template) IsReffable(ref string) bool {
+	if strings.HasPrefix(ref, "AWS::") {
+		return true
+	}
+
 	if _, ok := t.Reffables()[ref]; ok {
 		return true
 	}
