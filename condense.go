@@ -127,7 +127,7 @@ type Visitor func(interface{}) interface{}
 func walk(p interface{}, v Visitor) interface{} {
 	switch p := p.(type) {
 	default:
-		panic(fmt.Sprintf("unknown type %T\n", p))
+		panic(fmt.Sprintf("unknown type: %T\n", p))
 	case *Template:
 		if len(p.Parameters) > 0 {
 			p.Parameters = walk(p.Parameters, v).(map[string]interface{})
