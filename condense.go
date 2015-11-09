@@ -129,34 +129,58 @@ func (t *Template) Merge(o *Template) {
 
 type Visitor func(interface{}) interface{}
 
+func isComment(p interface{}) bool {
+	var m map[string]interface{}
+	var ok bool
+
+	m, ok = p.(map[string]interface{})
+	if !ok {
+		return false
+	}
+
+	if len(m) != 1 {
+		return false
+	}
+
+	_, ok = m["$comment"]
+	return ok
+}
+
 func walk(p interface{}, v Visitor) interface{} {
-	switch p := p.(type) {
+	switch typed := p.(type) {
 	default:
-		panic(fmt.Sprintf("unknown type: %T\n", p))
+		panic(fmt.Sprintf("unknown type: %T\n", typed))
 	case *Template:
-		if len(p.Parameters) > 0 {
-			p.Parameters = walk(p.Parameters, v).(map[string]interface{})
+		if len(typed.Parameters) > 0 {
+			typed.Parameters = walk(typed.Parameters, v).(map[string]interface{})
 		}
 
-		if len(p.Conditions) > 0 {
-			p.Conditions = walk(p.Conditions, v).(map[string]interface{})
+		if len(typed.Conditions) > 0 {
+			typed.Conditions = walk(typed.Conditions, v).(map[string]interface{})
 		}
 
-		if len(p.Resources) > 0 {
-			p.Resources = walk(p.Resources, v).(map[string]interface{})
+		if len(typed.Resources) > 0 {
+			typed.Resources = walk(typed.Resources, v).(map[string]interface{})
 		}
 	case []interface{}:
-		for i, value := range p {
-			p[i] = walk(value, v)
-		}
-	case map[string]interface{}:
-		for k, value := range p {
-			if k == "$comment" {
-				delete(p, k)
+		filtered := []interface{}{}
+		for _, value := range typed {
+			if isComment(value) {
 				continue
 			}
 
-			p[k] = walk(value, v)
+			filtered = append(filtered, walk(value, v))
+		}
+
+		p = interface{}(filtered)
+	case map[string]interface{}:
+		for k, value := range typed {
+			if k == "$comment" {
+				delete(typed, k)
+				continue
+			}
+
+			typed[k] = walk(value, v)
 		}
 	case string:
 	case bool:
