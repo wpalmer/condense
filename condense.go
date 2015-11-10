@@ -323,9 +323,48 @@ func getComponent(name string) (*Template, bool) {
 	return &template, true
 }
 
+type OutputWhat int
+const (
+	OutputTemplate = iota
+	OutputParameters
+)
+
+type OutputWhatFlag struct {
+	what OutputWhat
+}
+
+func (f OutputWhatFlag) Get() OutputWhat {
+	return f.what
+}
+
+func (f OutputWhatFlag) String() string {
+	switch f.what {
+	case OutputTemplate:
+		return "template"
+	case OutputParameters:
+		return "parameters"
+	default:
+		return "[unknown]"
+	}
+}
+
+func (f *OutputWhatFlag) Set(input string) error {
+	switch input {
+	case "template":
+		f.what = OutputTemplate
+	case "parameters":
+		f.what = OutputParameters
+	default:
+		return fmt.Errorf("Unknown -output `%s' requested", input)
+	}
+
+	return nil
+}
+
 func main() {
 	var templateFilename string
 	var parametersFilename string
+	var outputWhat OutputWhatFlag
 
 	flag.StringVar(&templateFilename,
 		"template", "-",
@@ -334,6 +373,10 @@ func main() {
 	flag.StringVar(&parametersFilename,
 		"parameters", "",
 		"CloudFormation Template to process")
+
+	flag.Var(&outputWhat,
+		"output",
+		"What to output after processing the Template")
 
 	flag.Parse()
 
@@ -436,6 +479,31 @@ func main() {
 		pending = pending - 1
 	}
 
-	enc := json.NewEncoder(os.Stdout)
-	enc.Encode(t)
+	switch outputWhat.Get() {
+	case OutputTemplate:
+		enc := json.NewEncoder(os.Stdout)
+		enc.Encode(t)
+	case OutputParameters:
+		parameters := []cloudformation.Parameter{}
+		for name, _ := range t.Parameters {
+			input_value, ok := in.Get([]string{name})
+			if !ok {
+				continue
+			}
+
+			parameters = append(parameters, func(name string, value interface{}) cloudformation.Parameter {
+				stringval := fmt.Sprintf("%s", value)
+				boolval := false
+
+				return cloudformation.Parameter{
+					ParameterKey: &name,
+					ParameterValue: &stringval,
+					UsePreviousValue: &boolval,
+				}
+			}(name, input_value))
+		}
+
+		enc := json.NewEncoder(os.Stdout)
+		enc.Encode(parameters)
+	}
 }
