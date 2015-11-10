@@ -300,8 +300,13 @@ func (r *Refish) Map(in inputs.Inputs) map[string]interface{} {
 		}
 	}
 
+	outpath := []interface{}{}
+	for _, part := range r.Path(in) {
+		outpath = append(outpath, part)
+	}
+
 	return map[string]interface{}{
-		"Fn::GetAtt": r.Path(in),
+		"Fn::GetAtt": outpath,
 	}
 }
 
