@@ -10,7 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
-	"inputs"
+	"fallbackmap"
 )
 
 type Template struct {
@@ -271,7 +271,7 @@ func NewRefish(p map[string]interface{}) *Refish {
 	panic("non-Refish passed to NewRefish")
 }
 
-func (r *Refish) Lead(in inputs.Inputs) string {
+func (r *Refish) Lead(in *fallbackmap.FallbackMap) string {
 	lead := r.path[0]
 	aliasKey := fmt.Sprintf("%s.", lead)
 
@@ -282,7 +282,7 @@ func (r *Refish) Lead(in inputs.Inputs) string {
 	return lead
 }
 
-func (r *Refish) Path(in inputs.Inputs) []string {
+func (r *Refish) Path(in *fallbackmap.FallbackMap) []string {
 	var path []string
 
 	path = append(path, r.Lead(in))
@@ -293,7 +293,7 @@ func (r *Refish) Path(in inputs.Inputs) []string {
 	return path
 }
 
-func (r *Refish) Map(in inputs.Inputs) map[string]interface{} {
+func (r *Refish) Map(in *fallbackmap.FallbackMap) map[string]interface{} {
 	if r.Type == Ref {
 		return map[string]interface{}{
 			"Ref": r.Lead(in),
@@ -321,6 +321,45 @@ func getComponent(name string) (*Template, bool) {
 	decoder := json.NewDecoder(reader)
 	decoder.Decode(&template)
 	return &template, true
+}
+
+type InputsFlag struct {
+	inputs *fallbackmap.FallbackMap
+	sources []string
+}
+
+func (f *InputsFlag) Get() *fallbackmap.FallbackMap {
+	if f.inputs == nil {
+		f.inputs = fallbackmap.NewFallbackMap(map[string]interface{}{})
+	}
+
+	return f.inputs
+}
+
+func (f InputsFlag) String() string {
+	return fmt.Sprintf("%v", f.sources)
+}
+
+func (f *InputsFlag) Set(parametersFilename string) (err error) {
+	var inputStream io.Reader
+	var in map[string]interface{}
+
+	if inputStream, err = os.Open(parametersFilename); err != nil {
+		return err
+	}
+
+	inputDecoder := json.NewDecoder(inputStream)
+	if err := inputDecoder.Decode(&in); err != nil {
+		return err
+	}
+
+	if f.inputs == nil {
+		f.inputs = fallbackmap.NewFallbackMap(in)
+	} else {
+		f.inputs.Override(in)
+	}
+
+	return nil
 }
 
 type OutputWhat int
@@ -363,16 +402,16 @@ func (f *OutputWhatFlag) Set(input string) error {
 
 func main() {
 	var templateFilename string
-	var parametersFilename string
 	var outputWhat OutputWhatFlag
+	var inputParameters InputsFlag
 
 	flag.StringVar(&templateFilename,
 		"template", "-",
 		"CloudFormation Template to process")
 
-	flag.StringVar(&parametersFilename,
-		"parameters", "",
-		"CloudFormation Template to process")
+	flag.Var(&inputParameters,
+		"parameters",
+		"File to use of input parameters (can be specified multiple times)")
 
 	flag.Var(&outputWhat,
 		"output",
@@ -381,7 +420,6 @@ func main() {
 	flag.Parse()
 
 	var jsonStream io.Reader
-	var inputStream io.Reader
 	var err error
 
 	if templateFilename == "-" {
@@ -390,21 +428,10 @@ func main() {
 		panic(err)
 	}
 
-	if parametersFilename == "" {
-		inputStream = strings.NewReader("{}")
-	} else if inputStream, err = os.Open(parametersFilename); err != nil {
-		panic(err)
-	}
-
 	dec := json.NewDecoder(jsonStream)
-	idec := json.NewDecoder(inputStream)
 
 	var t Template
-	var in inputs.Inputs
-	if err := idec.Decode(&in); err != nil {
-		panic(err)
-	}
-
+	in := inputParameters.Get()
 	if err := dec.Decode(&t); err != nil {
 		panic(err)
 	}
@@ -455,7 +482,7 @@ func main() {
 					outputsMap[r.Lead(in)] = map[string]interface{}{
 						"Outputs": outputs,
 					}
-					in.Attach(r.Lead(in), inputs.NewInputs(outputsMap))
+					in.Attach(outputsMap)
 
 					if value, ok := in.Get(r.Path(in)); ok {
 						return value
