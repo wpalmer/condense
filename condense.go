@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
+	"deepcloudformationoutputs"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"io"
 	"os"
 	"path"
 	"strings"
 	"fallbackmap"
+	"deepalias"
 )
 
 type Template struct {
@@ -22,33 +23,6 @@ type Template struct {
 	Conditions               map[string]interface{} `json:",omitempty"`
 	Resources                map[string]interface{} `json:",omitempty"`
 	Outputs                  map[string]interface{} `json:",omitempty"`
-}
-
-func getStackOutputs(name string) (map[string]interface{}, bool) {
-	svc := cloudformation.New(&aws.Config{Region: aws.String("eu-west-1")})
-	description, err := svc.DescribeStacks(&cloudformation.DescribeStacksInput{
-		StackName: &name,
-	})
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Err: %s\n", err)
-		return nil, false
-	}
-
-	if len(description.Stacks) != 1 {
-		panic(fmt.Sprintf(
-			"Description of [%s] did not return in exactly one Stack",
-			name,
-		))
-	}
-
-	outputs := map[string]interface{}{}
-	stack := description.Stacks[0]
-	for _, output := range stack.Outputs {
-		outputs[*output.OutputKey] = *output.OutputValue
-	}
-
-	return outputs, true
 }
 
 type ReffableType int
@@ -240,17 +214,19 @@ const (
 type Refish struct {
 	Type RefType
 	path []string
+	sources fallbackmap.Deep
 }
 
 func IsRefish(p map[string]interface{}) bool {
 	return isRef(p) || isGetAtt(p)
 }
 
-func NewRefish(p map[string]interface{}) *Refish {
+func NewRefish(p map[string]interface{}, sources fallbackmap.Deep) *Refish {
 	if isRef(p) {
 		return &Refish{
 			Type: Ref,
 			path: strings.Split(p["Ref"].(string), "."),
+			sources: sources,
 		}
 	}
 
@@ -265,44 +241,36 @@ func NewRefish(p map[string]interface{}) *Refish {
 		return &Refish{
 			Type: GetAtt,
 			path: path,
+			sources: sources,
 		}
 	}
 
 	panic("non-Refish passed to NewRefish")
 }
 
-func (r *Refish) Lead(in *fallbackmap.FallbackMap) string {
-	lead := r.path[0]
-	aliasKey := fmt.Sprintf("%s.", lead)
-
-	if alias, ok := in.Get([]string{aliasKey}); ok {
-		return alias.(string)
-	}
-
-	return lead
+func (r *Refish) Lead() string {
+	return r.Path()[0]
 }
 
-func (r *Refish) Path(in *fallbackmap.FallbackMap) []string {
-	var path []string
-
-	path = append(path, r.Lead(in))
-	for _, part := range r.path[1:] {
-		path = append(path, part)
-	}
-
-	return path
+func (r *Refish) Path() []string {
+	translated, _ := deepalias.DeAlias(r.path, r.sources)
+	return translated
 }
 
 func (r *Refish) Map(in *fallbackmap.FallbackMap) map[string]interface{} {
 	if r.Type == Ref {
 		return map[string]interface{}{
-			"Ref": r.Lead(in),
+			"Ref": strings.Join(r.Path(), "."),
 		}
 	}
 
-	outpath := []interface{}{}
-	for _, part := range r.Path(in) {
-		outpath = append(outpath, part)
+	var outpath []interface{}
+	path := r.Path()
+
+	if len(path) == 1 {
+		outpath = []interface{}{path[0]}
+	} else if len(path) > 1 {
+		outpath = []interface{}{path[0], strings.Join(path[1:], ".")}
 	}
 
 	return map[string]interface{}{
@@ -435,6 +403,11 @@ func main() {
 		panic(err)
 	}
 
+	sources := fallbackmap.FallbackMap{}
+	sources.Override(in)
+	sources.Override(deepalias.DeepAlias{&sources})
+	sources.Override(deepcloudformationoutputs.NewDeepCloudFormationOutputs("eu-west-1"))
+
 	pending := 1
 	for pending > 0 {
 		t.Walk(func(p interface{}) interface{} {
@@ -448,50 +421,31 @@ func main() {
 					return p
 				}
 
-				r := NewRefish(p)
-				if t.IsReffable(r.Lead(in)) {
+				r := NewRefish(p, fallbackmap.Deep(&sources))
+				if t.IsReffable(r.Lead()) {
 					return p
 				}
 
-				value, ok := in.Get(r.Path(in))
+				value, ok := sources.Get(r.Path())
 				if ok {
 					// existed in inputs: return that
 					return value
 				}
 
 				// search for a component to Include
-				component, ok := getComponent(r.Lead(in))
+				component, ok := getComponent(r.Lead())
 				if ok {
 					t.Merge(component)
 					pending = pending + 1
-					if t.IsReffable(r.Lead(in)) {
+					if t.IsReffable(r.Lead()) {
 						// after merging in the Include, everything was okay
 						return r.Map(in)
 					}
 
 					panic(fmt.Sprintf(
 						"Including %s component did not result in %s being reffable",
-						r.Lead(in), r.Lead(in),
+						r.Lead(), r.Lead(),
 					))
-				}
-
-				outputs, ok := getStackOutputs(r.Lead(in))
-				if ok {
-					outputsMap := map[string]interface{}{}
-					outputsMap[r.Lead(in)] = map[string]interface{}{
-						"Outputs": outputs,
-					}
-					in.Attach(fallbackmap.DeepMap(outputsMap))
-
-					if value, ok := in.Get(r.Path(in)); ok {
-						return value
-					} else {
-						panic(fmt.Sprintf(
-							"Unknown value for %v even after Merging in Stack Outputs for %s",
-							r.Path(in),
-							r.Lead(in),
-						))
-					}
 				}
 
 				// this is probably a failure, but let the next step in the chain
@@ -518,9 +472,30 @@ func main() {
 			}
 
 			parameters = append(parameters, func(name string, value interface{}) cloudformation.Parameter {
-				stringval := fmt.Sprintf("%s", value)
-				boolval := false
+				var stringval string
+				var boolval bool
+				var p map[string]interface{}
+				var ok bool
 
+				if p, ok = value.(map[string]interface{}); ok {
+					if !IsRefish(p) {
+						panic(fmt.Sprintf("non-string Parameter: %s", name))
+					}
+
+					var looked_up interface{}
+					r := NewRefish(p, fallbackmap.Deep(&sources))
+					looked_up, ok = sources.Get(r.Path())
+					if ok {
+						// existed in inputs: return that
+						stringval = fmt.Sprintf("%s", looked_up)
+					} else {
+						panic(fmt.Sprintf("Invalid reference %v for Parameter: %s", r.Path(), name))
+					}
+				} else {
+					stringval = fmt.Sprintf("%s", value)
+				}
+
+				boolval = false
 				return cloudformation.Parameter{
 					ParameterKey: &name,
 					ParameterValue: &stringval,
