@@ -412,10 +412,6 @@ func main() {
 	for pending > 0 {
 		t.Walk(func(p interface{}) interface{} {
 			switch p := p.(type) {
-			case string:
-				if p == "BbbValue" {
-					return "ReplacedBbbValue"
-				}
 			case map[string]interface{}:
 				if !IsRefish(p) {
 					return p
