@@ -250,7 +250,7 @@ func NewRefish(p map[string]interface{}) *Refish {
 	if isRef(p) {
 		return &Refish{
 			Type: Ref,
-			path: []string{p["Ref"].(string)},
+			path: strings.Split(p["Ref"].(string), "."),
 		}
 	}
 
