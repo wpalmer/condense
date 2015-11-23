@@ -330,7 +330,7 @@ type InputsFlag struct {
 
 func (f *InputsFlag) Get() *fallbackmap.FallbackMap {
 	if f.inputs == nil {
-		f.inputs = fallbackmap.NewFallbackMap(map[string]interface{}{})
+		f.inputs = &fallbackmap.FallbackMap{}
 	}
 
 	return f.inputs
@@ -354,11 +354,10 @@ func (f *InputsFlag) Set(parametersFilename string) (err error) {
 	}
 
 	if f.inputs == nil {
-		f.inputs = fallbackmap.NewFallbackMap(in)
-	} else {
-		f.inputs.Override(in)
+		f.inputs = &fallbackmap.FallbackMap{}
 	}
 
+	f.inputs.Override(fallbackmap.DeepMap(in))
 	return nil
 }
 
@@ -482,7 +481,7 @@ func main() {
 					outputsMap[r.Lead(in)] = map[string]interface{}{
 						"Outputs": outputs,
 					}
-					in.Attach(outputsMap)
+					in.Attach(fallbackmap.DeepMap(outputsMap))
 
 					if value, ok := in.Get(r.Path(in)); ok {
 						return value

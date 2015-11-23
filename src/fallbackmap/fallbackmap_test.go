@@ -35,17 +35,17 @@ func testGetString(i *FallbackMap, path []string, value string, t *testing.T) {
 }
 
 func TestGetBasic(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
+	i := &FallbackMap{[]Deep{DeepMap(map[string]interface{}{
 		"foo": 1,
 		"bar": 2,
-	})
+	})}}
 
 	testGetInt(i, []string{"foo"}, 1, t)
 	testGetInt(i, []string{"bar"}, 2, t)
 }
 
 func TestGetDeep(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
+	i := &FallbackMap{[]Deep{DeepMap(map[string]interface{}{
 		"foo": 1,
 		"a": map[string]interface{}{
 			"aa": 2,
@@ -54,17 +54,17 @@ func TestGetDeep(t *testing.T) {
 				"abb": 4,
 			},
 		},
-	})
+	})}}
 
 	testGetInt(i, []string{"a", "aa"}, 2, t)
 	testGetInt(i, []string{"a", "ab", "aba"}, 3, t)
 }
 
 func TestGetNegative(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
+	i := &FallbackMap{[]Deep{DeepMap(map[string]interface{}{
 		"foo": 1,
 		"bar": 2,
-	})
+	})}}
 
 	_, ok := i.Get([]string{"baz"})
 	if ok {
@@ -72,28 +72,11 @@ func TestGetNegative(t *testing.T) {
 	}
 }
 
-func TestGetNegative_NamespaceCollectionInvalid(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
-		"foo": 1,
-		"bar": 2,
-		"::": "InvalidCollection",
-	})
-
-	_, ok := i.Get([]string{"baz"})
-	if ok {
-		t.Fatalf(
-			"Get(...) of non-existant value reported success %s",
-			"(invalid namespace collection defined)",
-		)
-	}
-}
-
 func TestGetNegative_NamespaceCollectionEmpty(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
+	i := &FallbackMap{[]Deep{DeepMap(map[string]interface{}{
 		"foo": 1,
 		"bar": 2,
-		"::": map[string]interface{}{},
-	})
+	})}}
 
 	_, ok := i.Get([]string{"baz"})
 	if ok {
@@ -105,17 +88,17 @@ func TestGetNegative_NamespaceCollectionEmpty(t *testing.T) {
 }
 
 func TestAttach(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
+	i := &FallbackMap{[]Deep{DeepMap(map[string]interface{}{
 		"foo": 1,
 		"bar": 2,
-	})
+	})}}
 	
 	o := map[string]interface{}{
 		"bar": 3,
 		"baz": 4,
 	}
 	
-	i.Attach(o)
+	i.Attach(DeepMap(o))
 
 	testGetInt(i, []string{"foo"}, 1, t)
 	testGetInt(i, []string{"bar"}, 2, t)
@@ -123,14 +106,14 @@ func TestAttach(t *testing.T) {
 }
 
 func TestDeepAttach(t *testing.T) {
-	i := NewFallbackMap(map[string]interface{}{
+	i := &FallbackMap{[]Deep{DeepMap(map[string]interface{}{
 		"a": 1,
 		"aStack": map[string]interface{}{
 			"Outputs": map[string]interface{}{
 				"overriddenOutputValue": "overridden",
 			},
 		},
-	})
+	})}}
 
 	o := map[string]interface{}{
 		"aStack": map[string]interface{}{
@@ -141,7 +124,7 @@ func TestDeepAttach(t *testing.T) {
 		},
 	}
 
-	i.Attach(o)
+	i.Attach(DeepMap(o))
 
 	testGetString(i,
 		[]string{"aStack", "Outputs", "overriddenOutputValue"},
