@@ -404,9 +404,9 @@ func main() {
 	}
 
 	sources := fallbackmap.FallbackMap{}
-	sources.Override(in)
-	sources.Override(deepalias.DeepAlias{&sources})
-	sources.Override(deepcloudformationoutputs.NewDeepCloudFormationOutputs("eu-west-1"))
+	sources.Attach(in)
+	sources.Attach(deepalias.DeepAlias{&sources})
+	sources.Attach(deepcloudformationoutputs.NewDeepCloudFormationOutputs("eu-west-1"))
 
 	pending := 1
 	for pending > 0 {
