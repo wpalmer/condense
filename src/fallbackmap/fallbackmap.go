@@ -6,10 +6,6 @@ type Deep interface {
 
 type DeepMap map[string]interface{}
 
-func NewDeepMap(raw map[string]interface{}) DeepMap {
-	return DeepMap(raw)
-}
-
 func (deep DeepMap) Get(path []string) (value interface{}, has_key bool) {
 	if len(path) == 0 {
 		return deep, true
