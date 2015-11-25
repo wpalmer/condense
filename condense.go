@@ -225,7 +225,7 @@ func NewRefish(p map[string]interface{}, sources fallbackmap.Deep) *Refish {
 	if isRef(p) {
 		return &Refish{
 			Type: Ref,
-			path: strings.Split(p["Ref"].(string), "."),
+			path: deepalias.Split(p["Ref"].(string)),
 			sources: sources,
 		}
 	}
@@ -234,7 +234,7 @@ func NewRefish(p map[string]interface{}, sources fallbackmap.Deep) *Refish {
 		var path []string
 		args := p["Fn::GetAtt"].([]interface{})
 		path = append(path, args[0].(string))
-		for _, part := range strings.Split(args[1].(string), ".") {
+		for _, part := range deepalias.Split(args[1].(string)) {
 			path = append(path, part)
 		}
 
