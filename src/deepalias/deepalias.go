@@ -9,6 +9,36 @@ type DeepAlias struct {
 	fallbackmap.Deep
 }
 
+func Split(pathString string) []string {
+	var final []string
+	var next []string
+	var components []string
+	var nested int
+
+	components = strings.Split(pathString, ".")
+	for _, component := range components {
+		next = append(next, component)
+		if strings.HasPrefix(component, "[") {
+			nested++
+		}
+
+		if strings.HasSuffix(component, "]") {
+			nested--
+		}
+
+		if nested == 0 {
+			final = append(final, strings.Join(next, "."))
+			next = []string{}
+		}
+	}
+
+	if len(next) > 0 {
+		final = append(final, next...)
+	}
+
+	return final
+}
+
 func DeAlias(path []string, deep fallbackmap.Deep) ([]string, bool) {
 	did_translate := false
 	translated := []string{}
