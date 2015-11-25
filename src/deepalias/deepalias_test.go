@@ -3,6 +3,18 @@ package deepalias
 import "testing"
 import "fallbackmap"
 
+func testGetNil(i fallbackmap.Deep, path []string, t *testing.T) {
+	v, ok := i.Get(path)
+
+	if v != nil {
+		t.Fatalf("getting of %v returned nil", path)
+	}
+	
+	if ok {
+		t.Fatalf("getting of %v returned a result", path)
+	}
+}
+
 func testGetInt(i fallbackmap.Deep, path []string, value int, t *testing.T) {
 	v, ok := i.Get(path)
 	if !ok {
@@ -35,15 +47,15 @@ func testGetString(i fallbackmap.Deep, path []string, value string, t *testing.T
 	}
 }
 
-// With no aliases involved, acts as fallbackmap.Deep
+// With no aliases involved, returns nothing (to prevent infinite recursion)
 func TestGetBasic(t *testing.T) {
 	i := DeepAlias{fallbackmap.DeepMap(map[string]interface{}{
 		"foo": 1,
 		"bar": 2,
 	})}
 
-	testGetInt(i, []string{"foo"}, 1, t)
-	testGetInt(i, []string{"bar"}, 2, t)
+	testGetNil(i, []string{"foo"}, t)
+	testGetNil(i, []string{"bar"}, t)
 }
 
 func TestGetAliased(t *testing.T) {
@@ -58,7 +70,7 @@ func TestGetAliased(t *testing.T) {
 	testGetInt(i, []string{"[anotherAlias]"}, 2, t)
 }
 
-// With no aliases involved, acts as fallbackmap.Deep
+// With no aliases involved, returns nothing (to prevent infinite recursion)
 func TestGetDeepBasic(t *testing.T) {
 	i := DeepAlias{fallbackmap.DeepMap(map[string]interface{}{
 		"foo": 1,
@@ -71,8 +83,8 @@ func TestGetDeepBasic(t *testing.T) {
 		},
 	})}
 
-	testGetInt(i, []string{"a", "aa"}, 2, t)
-	testGetInt(i, []string{"a", "ab", "aba"}, 3, t)
+	testGetNil(i, []string{"a", "aa"}, t)
+	testGetNil(i, []string{"a", "ab", "aba"}, t)
 }
 
 func TestGetDeepAlias(t *testing.T) {
