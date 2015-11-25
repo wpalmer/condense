@@ -2,9 +2,9 @@
 
 CloudFormation template Preprocessor
 
- * Split templates into small "component" files, automatically included when referenced via `{"Ref": "ComponentName"}` or `{"Fn::GetAtt", ["ComponentName", "AttName"]}`
- * Automatic lookup of external stack Outputs via `{"Fn::GetAtt", ["StackName", "Outputs.OutputName"]}`
- * Locally-derefenced parameters via `-parameters` files, derefenced via `{"Ref": "ParameterKey"}` or `{"Fn::GetAtt", ["ParameterKey", "SubKey.SubSubKey"]}`
+ * Split templates into small "component" files, automatically included when referenced via `{"Ref": "ComponentName"}` or `{"Fn::GetAtt": ["ComponentName", "AttName"]}`
+ * Automatic lookup of external stack Outputs via `{"Fn::GetAtt": ["StackName", "Outputs.OutputName"]}`
+ * Locally-derefenced parameters via `-parameters` files, derefenced via `{"Ref": "ParameterKey"}` or `{"Fn::GetAtt": ["ParameterKey", "SubKey.SubSubKey"]}`
  * Add comments almost anywhere via JSON `"$comment"` keys
 
 
