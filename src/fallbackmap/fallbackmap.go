@@ -5,6 +5,11 @@ type Deep interface {
 }
 
 type DeepMap map[string]interface{}
+type DeepFunc func(path []string) (value interface{}, has_key bool)
+
+func (deep DeepFunc) Get(path []string) (value interface{}, has_key bool) {
+	return deep(path)
+}
 
 func (deep DeepMap) Get(path []string) (value interface{}, has_key bool) {
 	if len(path) == 0 {
