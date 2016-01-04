@@ -17,9 +17,14 @@ import (
 	"condense/template/rules"
 )
 
+type inputSource struct {
+	filename string
+	data map[string]interface{}
+}
+
 type InputsFlag struct {
 	inputs  *fallbackmap.FallbackMap
-	sources map[string]map[string]interface{}
+	sources []inputSource
 }
 
 func (f *InputsFlag) Get() *fallbackmap.FallbackMap {
@@ -36,6 +41,9 @@ func (f InputsFlag) String() string {
 
 func (f *InputsFlag) Set(parametersFilename string) (err error) {
 	var inputStream io.Reader
+	var raw interface{}
+	var ok bool
+	var ins []interface{}
 	var in map[string]interface{}
 
 	if inputStream, err = os.Open(parametersFilename); err != nil {
@@ -43,24 +51,43 @@ func (f *InputsFlag) Set(parametersFilename string) (err error) {
 	}
 
 	inputDecoder := json.NewDecoder(inputStream)
-	if err := inputDecoder.Decode(&in); err != nil {
+	if err := inputDecoder.Decode(&raw); err != nil {
 		return err
 	}
 
-	if f.inputs == nil {
-		f.inputs = &fallbackmap.FallbackMap{}
+	if ins, ok = raw.([]interface{}); !ok {
+		if in, ok = raw.(map[string]interface{}); !ok {
+			return fmt.Errorf("JSON data does not decode into an array or map")
+		}
+
+		ins = append(ins, interface{}(in))
 	}
 
-	f.inputs.Override(fallbackmap.DeepMap(in))
+	var i int
+	for i, raw = range ins {
+		if in, ok = raw.(map[string]interface{}); !ok {
+			return fmt.Errorf("JSON data does not decode into a map or array of maps")
+		}
 
-	if f.sources == nil {
-		f.sources = make(map[string]map[string]interface{})
+		if f.inputs == nil {
+			f.inputs = &fallbackmap.FallbackMap{}
+		}
+
+		var parametersFilespec string
+		if len(ins) == 1 {
+			parametersFilespec = parametersFilename
+		} else {
+			parametersFilespec = fmt.Sprintf("%s[%d]", parametersFilename, i)
+		}
+
+		f.inputs.Override(fallbackmap.DeepMap(in))
+		f.sources = append(f.sources, inputSource{filename: parametersFilespec, data: in})
 	}
-	f.sources[parametersFilename] = in
+
 	return nil
 }
 
-func (f *InputsFlag) Sources() (map[string]map[string]interface{}) {
+func (f *InputsFlag) Sources() ([]inputSource) {
 	return f.sources
 }
 
@@ -212,14 +239,18 @@ func main() {
 	case OutputCredentials:
 		var credentials []interface{}
 		credentialMap := make(map[string]interface{})
-		for filename, input := range inputParameters.Sources() {
-			credentialMap = template.Process(input, &templateRules).(map[string]interface{})
-			credentialMap["$comment"] = map[string]interface{}{"filename": filename}
+		for _, input := range inputParameters.Sources() {
+			credentialMap = template.Process(input.data, &templateRules).(map[string]interface{})
+			credentialMap["$comment"] = map[string]interface{}{"filename": input.filename}
 			credentials = append(credentials, credentialMap)
 		}
 
 		enc := json.NewEncoder(os.Stdout)
-		enc.Encode(credentials)
+		if len(credentials) == 1 {
+			enc.Encode(credentials[0])
+		} else {
+			enc.Encode(credentials)
+		}
 	case OutputParameters:
 		var templateParameters interface{}
 		var templateParameterMap map[string]interface{}
