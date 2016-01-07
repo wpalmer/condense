@@ -224,6 +224,7 @@ func main() {
 	}))
 
 	templateRules.AttachEarly(rules.ExcludeComments)
+	templateRules.AttachEarly(rules.MakeFnFor(&sources, &templateRules))
 	templateRules.Attach(rules.FnJoin)
 	templateRules.Attach(rules.MakeFnGetAtt(&sources, &templateRules))
 	templateRules.Attach(rules.MakeRef(&sources, &templateRules))

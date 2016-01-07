@@ -40,6 +40,18 @@ func eachRule(path []interface{}, node interface{}, rules []Rule) (newKey interf
 	return newKey, newNode
 }
 
+func (r *Rules) MakeEachEarly() Rule {
+	return func (path []interface{}, node interface{}) (newKey interface{}, newNode interface{}) {
+		return eachRule(path, node, r.Early)
+	}
+}
+
+func (r *Rules) MakeEach() Rule {
+	return func (path []interface{}, node interface{}) (newKey interface{}, newNode interface{}) {
+		return eachRule(path, node, r.Depth)
+	}
+}
+
 func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{}, newNode interface{}) {
 	newPath := make([]interface{}, len(path))
 	copy(newPath, path)
