@@ -112,6 +112,7 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 	case bool:
 	case int:
 	case float64:
+	case nil:
 	}
 
 	newKey, newNode = eachRule(newPath, newNode, rules.Depth)
