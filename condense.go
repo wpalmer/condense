@@ -101,10 +101,12 @@ const (
 
 type OutputWhatFlag struct {
 	what OutputWhat
+	hasKey bool
+	key  string
 }
 
-func (f OutputWhatFlag) Get() OutputWhat {
-	return f.what
+func (f OutputWhatFlag) Get() OutputWhatFlag {
+	return f
 }
 
 func (f OutputWhatFlag) String() string {
@@ -121,6 +123,15 @@ func (f OutputWhatFlag) String() string {
 }
 
 func (f *OutputWhatFlag) Set(input string) error {
+	if strings.HasPrefix(input, "credentials:") {
+		f.what = OutputCredentials
+		f.hasKey = true
+		f.key = input[12:]
+
+		return nil
+	}
+
+	f.hasKey = false
 	switch input {
 	case "template":
 		f.what = OutputTemplate
@@ -232,17 +243,23 @@ func main() {
 		}
 	}
 
-	switch outputWhat.Get() {
+	switch outputWhat.Get().what {
 	case OutputTemplate:
 		enc := json.NewEncoder(os.Stdout)
 		enc.Encode(processed)
 	case OutputCredentials:
-		var credentials []interface{}
+		credentials := []interface{}{}
 		credentialMap := make(map[string]interface{})
 		for _, input := range inputParameters.Sources() {
-			credentialMap = template.Process(input.data, &templateRules).(map[string]interface{})
-			credentialMap["$comment"] = map[string]interface{}{"filename": input.filename}
-			credentials = append(credentials, credentialMap)
+			if !outputWhat.Get().hasKey || outputWhat.Get().key == input.filename {
+				credentialMap = template.Process(input.data, &templateRules).(map[string]interface{})
+				credentialMap["$comment"] = map[string]interface{}{"filename": input.filename}
+				credentials = append(credentials, credentialMap)
+			}
+		}
+
+		if len(credentials) == 0 && outputWhat.Get().hasKey {
+			panic(fmt.Errorf("No parameters file '%s' was input", outputWhat.Get().key))
 		}
 
 		enc := json.NewEncoder(os.Stdout)
