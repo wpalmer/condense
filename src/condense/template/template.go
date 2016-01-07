@@ -17,6 +17,29 @@ func (r *Rules) Attach(rule Rule) {
 	r.Depth = append(r.Depth, rule)
 }
 
+func eachRule(path []interface{}, node interface{}, rules []Rule) (newKey interface{}, newNode interface{}) {
+	newPath := make([]interface{}, len(path))
+	copy(newPath, path)
+
+	newNode = node
+	newKey = interface{}(nil)
+	if len(newPath) > 0 {
+		newKey = newPath[len(newPath)-1]
+	}
+	for _, rule := range rules {
+		newKey, newNode = rule(newPath, newNode)
+		if len(newPath) > 0 {
+			if newKey == nil {
+				return nil, nil
+			}
+
+			newPath[len(newPath)-1] = newKey
+		}
+	}
+
+	return newKey, newNode
+}
+
 func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{}, newNode interface{}) {
 	newPath := make([]interface{}, len(path))
 	copy(newPath, path)
@@ -27,15 +50,13 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 		newKey = newPath[len(newPath)-1]
 	}
 
-	for _, rule := range rules.Early {
-		newKey, newNode = rule(newPath, newNode)
-		if len(newPath) > 0 {
-			if newKey == nil {
-				return nil, nil
-			}
-
-			newPath[len(newPath)-1] = newKey
+	newKey, newNode = eachRule(newPath, newNode, rules.Early)
+	if len(newPath) > 0 {
+		if newKey == nil {
+			return nil, nil
 		}
+
+		newPath[len(newPath)-1] = newKey
 	}
 
 	switch typed := newNode.(type) {
@@ -81,17 +102,7 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 	case float64:
 	}
 
-	for _, rule := range rules.Depth {
-		newKey, newNode = rule(newPath, newNode)
-		if len(newPath) > 0 {
-			if newKey == nil {
-				break
-			}
-
-			newPath[len(newPath)-1] = newKey
-		}
-	}
-
+	newKey, newNode = eachRule(newPath, newNode, rules.Depth)
 	return newKey, newNode
 }
 
