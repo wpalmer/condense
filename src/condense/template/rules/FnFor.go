@@ -37,7 +37,7 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 		loopTemplate := interface{}(args[2])
 
 		var generated []interface{}
-		for _, value := range values {
+		for deepIndex, value := range values {
 			loopTemplateSources := fallbackmap.FallbackMap{}
 			loopTemplateRules := template.Rules{}
 			
@@ -54,8 +54,14 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 			loopTemplateRules.Attach(templateRules.MakeEach())
 			loopTemplateRules.AttachEarly(templateRules.MakeEachEarly())
 
-			processed := template.Process(loopTemplate, &loopTemplateRules)
-			generated = append(generated, processed)
+			deepPath := make([]interface{}, len(path)+1)
+			copy(deepPath, path)
+			deepPath[cap(deepPath)-1] = interface{}(deepIndex)
+
+			newIndex, processed := template.Walk(deepPath, loopTemplate, &loopTemplateRules)
+			if newIndex != nil {
+				generated = append(generated, processed)
+			}
 		}
 
 		return key, interface{}(generated)

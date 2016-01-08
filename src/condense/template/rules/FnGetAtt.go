@@ -40,8 +40,9 @@ func MakeFnGetAtt(sources *fallbackmap.FallbackMap, rules *template.Rules) templ
 		var newNode interface{}
 		newNode, ok = sources.Get(refpath)
 		if ok {
-			newNode = template.Process(newNode, rules)
-			return key, newNode
+			var newKey interface{}
+			newKey, newNode = template.Walk(path, newNode, rules)
+			return newKey, newNode
 		}
 		
 		return key, node //passthru (ref not found)
