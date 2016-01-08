@@ -231,6 +231,7 @@ func main() {
 	templateRules.Attach(rules.FnNot)
 	templateRules.Attach(rules.FnEquals)
 	templateRules.Attach(rules.FnJoin)
+	templateRules.Attach(rules.FnUnique)
 	templateRules.Attach(rules.MakeFnGetAtt(&sources, &templateRules))
 	templateRules.Attach(rules.MakeRef(&sources, &templateRules))
 	templateRules.Attach(rules.ReduceConditions)
