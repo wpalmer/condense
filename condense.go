@@ -225,9 +225,15 @@ func main() {
 
 	templateRules.AttachEarly(rules.ExcludeComments)
 	templateRules.AttachEarly(rules.MakeFnFor(&sources, &templateRules))
+	templateRules.Attach(rules.FnIf)
+	templateRules.Attach(rules.FnAnd)
+	templateRules.Attach(rules.FnOr)
+	templateRules.Attach(rules.FnNot)
+	templateRules.Attach(rules.FnEquals)
 	templateRules.Attach(rules.FnJoin)
 	templateRules.Attach(rules.MakeFnGetAtt(&sources, &templateRules))
 	templateRules.Attach(rules.MakeRef(&sources, &templateRules))
+	templateRules.Attach(rules.ReduceConditions)
 
 	processed := template.Process(t, &templateRules)
 
