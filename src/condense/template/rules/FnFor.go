@@ -30,8 +30,11 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 			return key, node //passthru
 		}
 
+		valuesInterface := args[1]
+		_, valuesInterface = template.Walk(path, valuesInterface, templateRules)
+
 		var values []interface{}
-		if values, ok = args[1].([]interface{}); !ok {
+		if values, ok = valuesInterface.([]interface{}); !ok {
 			return key, node //passthru
 		}
 
