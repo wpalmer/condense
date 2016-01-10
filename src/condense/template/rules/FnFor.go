@@ -3,6 +3,7 @@ package rules
 import (
 	"fallbackmap"
 	"condense/template"
+	"deepalias"
 )
 
 func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) template.Rule {
@@ -48,9 +49,11 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 
 				return value, true
 			}))
+			loopTemplateSources.Attach(deepalias.DeepAlias{&loopTemplateSources})
 			loopTemplateSources.Attach(sources)
 
 			loopTemplateRules.Attach(MakeRef(&loopTemplateSources, &loopTemplateRules))
+			loopTemplateRules.Attach(MakeFnGetAtt(&loopTemplateSources, &loopTemplateRules))
 			loopTemplateRules.Attach(templateRules.MakeEach())
 			loopTemplateRules.AttachEarly(templateRules.MakeEachEarly())
 
