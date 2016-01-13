@@ -234,6 +234,7 @@ func main() {
 	templateRules.Attach(rules.FnJoin)
 	templateRules.Attach(rules.FnKeys)
 	templateRules.Attach(rules.FnMerge)
+	templateRules.Attach(rules.FnSplit)
 	templateRules.Attach(rules.FnUnique)
 	templateRules.Attach(rules.MakeFnGetAtt(&sources, &templateRules))
 	templateRules.Attach(rules.MakeRef(&sources, &templateRules))
