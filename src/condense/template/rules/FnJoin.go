@@ -2,6 +2,7 @@ package rules
 
 import (
 	"strings"
+	"fmt"
 )
 
 func FnJoin(path []interface{}, node interface{}) (interface{}, interface{}) {
@@ -36,8 +37,15 @@ func FnJoin(path []interface{}, node interface{}) (interface{}, interface{}) {
 	for _, piece := range pieces {
 		var pieceString string
 
-		if pieceString, ok = piece.(string); !ok {
+		switch typed := piece.(type) {
+		default:
 			return key, node //passthru
+		case string:
+			pieceString = typed
+		case int:
+			pieceString = fmt.Sprintf("%d", typed)
+		case float64:
+			pieceString = fmt.Sprintf("%d", int(typed))
 		}
 
 		piecesStrings = append(piecesStrings, pieceString)
