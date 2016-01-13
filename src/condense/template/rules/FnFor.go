@@ -44,13 +44,9 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 		for deepIndex, value := range values {
 			loopTemplateSources := fallbackmap.FallbackMap{}
 			loopTemplateRules := template.Rules{}
-			
-			loopTemplateSources.Attach(fallbackmap.DeepFunc(func(path []string) (interface{}, bool) {
-				if len(path) != 1 || path[0] != refName {
-					return nil, false
-				}
 
-				return value, true
+			loopTemplateSources.Attach(fallbackmap.DeepMap(map[string]interface{}{
+				refName: value,
 			}))
 			loopTemplateSources.Attach(deepalias.DeepAlias{&loopTemplateSources})
 			loopTemplateSources.Attach(sources)
