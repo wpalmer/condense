@@ -25,9 +25,23 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 			return key, node //passthru
 		}
 
-		var refName string
-		if refName, ok = args[0].(string); !ok {
-			return key, node //passthru
+		var refNames []interface{}
+		var refName interface{}
+
+		if refNames, ok = args[0].([]interface{}); ok {
+			if len(refNames) == 1 {
+				refNames = []interface{}{nil, refNames[0]}
+			} else if len(refNames) != 2 {
+				return key, node //passthru
+			}
+		} else {
+			refNames = []interface{}{nil, args[0]}
+		}
+
+		for _, refName = range refNames {
+			if _, ok = refName.(string); !ok && refName != nil {
+				return key, node //passthru
+			}
 		}
 
 		valuesInterface := args[1]
@@ -45,9 +59,17 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 			loopTemplateSources := fallbackmap.FallbackMap{}
 			loopTemplateRules := template.Rules{}
 
-			loopTemplateSources.Attach(fallbackmap.DeepMap(map[string]interface{}{
-				refName: value,
-			}))
+			refMap := make(map[string]interface{})
+			if refNames[0] != nil {
+				refMap[ refNames[0].(string) ] = float64(deepIndex)
+			}
+
+			if refNames[1] != nil {
+				refMap[ refNames[1].(string) ] = value
+			}
+
+			loopTemplateSources.Attach(fallbackmap.DeepMap(refMap))
+
 			loopTemplateSources.Attach(deepalias.DeepAlias{&loopTemplateSources})
 			loopTemplateSources.Attach(sources)
 
