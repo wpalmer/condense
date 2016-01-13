@@ -225,6 +225,7 @@ func main() {
 
 	templateRules.AttachEarly(rules.ExcludeComments)
 	templateRules.AttachEarly(rules.MakeFnFor(&sources, &templateRules))
+	templateRules.Attach(rules.FnAdd)
 	templateRules.Attach(rules.FnIf)
 	templateRules.Attach(rules.FnAnd)
 	templateRules.Attach(rules.FnOr)
