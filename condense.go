@@ -43,24 +43,43 @@ func (f *InputsFlag) Set(parametersFilename string) (err error) {
 	var inputStream io.Reader
 	var raw interface{}
 	var ok bool
+	var gotRaw bool
 	var ins []interface{}
 	var in map[string]interface{}
 
-	if inputStream, err = os.Open(parametersFilename); err != nil {
-		return err
+	rawJson := strings.NewReader(parametersFilename)
+	rawDecoder := json.NewDecoder(rawJson)
+	if err := rawDecoder.Decode(&raw); err == nil {
+		if ins, ok = raw.([]interface{}); ok {
+			gotRaw = true
+		} else if in, ok = raw.(map[string]interface{}); ok {
+			ins = append(ins, interface{}(in))
+			gotRaw = true
+		}
 	}
 
-	inputDecoder := json.NewDecoder(inputStream)
-	if err := inputDecoder.Decode(&raw); err != nil {
-		return err
-	}
+	if gotRaw {
+		parametersFilename = "[inline]"
+	} else {
+		// reset, as we cannot rely on the state of raw after decoding into it
+		raw = interface{}(nil)
 
-	if ins, ok = raw.([]interface{}); !ok {
-		if in, ok = raw.(map[string]interface{}); !ok {
-			return fmt.Errorf("JSON data does not decode into an array or map")
+		if inputStream, err = os.Open(parametersFilename); err != nil {
+			return err
 		}
 
-		ins = append(ins, interface{}(in))
+		inputDecoder := json.NewDecoder(inputStream)
+		if err := inputDecoder.Decode(&raw); err != nil {
+			return err
+		}
+
+		if ins, ok = raw.([]interface{}); !ok {
+			if in, ok = raw.(map[string]interface{}); !ok {
+				return fmt.Errorf("JSON data does not decode into an array or map")
+			}
+
+			ins = append(ins, interface{}(in))
+		}
 	}
 
 	var i int
