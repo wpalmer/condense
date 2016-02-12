@@ -56,6 +56,8 @@ func MakeFnWith(sources *fallbackmap.FallbackMap, outerRules *template.Rules) te
 		templateRules.Attach(MakeRef(&templateSources, &templateRules))
 		templateRules.Attach(MakeFnGetAtt(&templateSources, &templateRules))
 		templateRules.Attach(outerRules.MakeEach())
+		templateRules.AttachEarly(MakeFnFor(&templateSources, &templateRules))
+		templateRules.AttachEarly(MakeFnWith(&templateSources, &templateRules))
 		templateRules.AttachEarly(outerRules.MakeEachEarly())
 
 		key, generated := template.Walk(path, innerTemplate, &templateRules)

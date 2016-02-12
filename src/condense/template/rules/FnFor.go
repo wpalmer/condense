@@ -88,6 +88,8 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 			loopTemplateRules.Attach(MakeRef(&loopTemplateSources, &loopTemplateRules))
 			loopTemplateRules.Attach(MakeFnGetAtt(&loopTemplateSources, &loopTemplateRules))
 			loopTemplateRules.Attach(templateRules.MakeEach())
+			loopTemplateRules.AttachEarly(MakeFnFor(&loopTemplateSources, &loopTemplateRules))
+			loopTemplateRules.AttachEarly(MakeFnWith(&loopTemplateSources, &loopTemplateRules))
 			loopTemplateRules.AttachEarly(templateRules.MakeEachEarly())
 
 			deepPath := make([]interface{}, len(path)+1)
