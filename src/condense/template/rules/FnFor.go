@@ -11,17 +11,29 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 		key := interface{}(nil)
 		if len(path) > 0 { key = path[len(path)-1] }
 
-		argsInterface, ok := singleKey(node, "Fn::For")
+		raw, ok := singleKey(node, "Fn::For")
 		if !ok {
 			return key, node //passthru
 		}
 
-		var args []interface{}
-		if args, ok = argsInterface.([]interface{}); !ok {
-			return key, node //passthru
-		}
+		args, ok := collectArgs(
+			raw,
+			func(argsSoFar []interface{}) bool { return len(argsSoFar) < 3; },
+			func(argsSoFar []interface{}, arg interface{}) (skip bool, newNode interface{}){
+				// unconditionally process the argument, in case it needs to be skipped
+				key, node := template.Walk(path, arg, templateRules)
+				if skip, ok := key.(bool); ok && skip {
+					return true, nil
+				}
 
-		if len(args) != 3 {
+				if len(argsSoFar) == 2 {
+					return false, arg // return unprocessed 3rd arg. It's a template.
+				}
+
+				return false, node
+			},
+		)
+		if !ok {
 			return key, node //passthru
 		}
 
