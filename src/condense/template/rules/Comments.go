@@ -16,7 +16,7 @@ func ExcludeComments(path []interface{}, node interface{}) (interface{}, interfa
 	}
 
 	if len(nodeMap) == 1 {
-		return nil, nil
+		return true, nil
 	}
 
 	delete(nodeMap, "$comment")

@@ -28,11 +28,11 @@ func eachRule(path []interface{}, node interface{}, rules []Rule) (newKey interf
 	}
 	for _, rule := range rules {
 		newKey, newNode = rule(newPath, newNode)
-		if len(newPath) > 0 {
-			if newKey == nil {
-				return nil, nil
-			}
+		if skip, ok := newKey.(bool); ok && skip {
+			return true, nil
+		}
 
+		if len(newPath) > 0 {
 			newPath[len(newPath)-1] = newKey
 		}
 	}
@@ -63,11 +63,11 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 	}
 
 	newKey, newNode = eachRule(newPath, newNode, rules.Early)
-	if len(newPath) > 0 {
-		if newKey == nil {
-			return nil, nil
-		}
+	if skip, ok := newKey.(bool); ok && skip {
+		return true, nil
+	}
 
+	if len(newPath) > 0 {
 		newPath[len(newPath)-1] = newKey
 	}
 
@@ -85,7 +85,7 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 			newDeepNode := deepNode
 			newDeepIndex, newDeepNode = Walk(newDeepPath, newDeepNode, rules)
 
-			if newDeepIndex != nil {
+			if skip, ok := newDeepIndex.(bool); !ok || !skip {
 				filtered = append(filtered, newDeepNode)
 			}
 		}
@@ -102,7 +102,7 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 			newDeepNode := deepNode
 			newDeepKey, newDeepNode = Walk(newDeepPath, newDeepNode, rules)
 
-			if newDeepKey != nil {
+			if skip, ok := newDeepKey.(bool); !ok || !skip {
 				filtered[newDeepKey.(string)] = newDeepNode
 			}
 		}
