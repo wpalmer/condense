@@ -121,6 +121,11 @@ func Walk(path []interface{}, node interface{}, rules *Rules) (newKey interface{
 
 func Process(node interface{}, rules *Rules) interface{} {
 	emptyPath := []interface{}{}
-	_, processed := Walk(emptyPath, node, rules)
+	newKey, processed := Walk(emptyPath, node, rules)
+
+	if skip, ok := newKey.(bool); ok && skip {
+		return interface{}(nil)
+	}
+
 	return processed
 }
