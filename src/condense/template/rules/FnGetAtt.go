@@ -6,7 +6,7 @@ import (
 	"condense/template"
 )
 
-func MakeFnGetAtt(sources *fallbackmap.FallbackMap, rules *template.Rules) template.Rule {
+func MakeFnGetAtt(sources fallbackmap.Deep, rules *template.Rules) template.Rule {
 	return func(path []interface{}, node interface{}) (interface{}, interface{}){
 		key := interface{}(nil)
 		if len(path) > 0 { key = path[len(path)-1] }
