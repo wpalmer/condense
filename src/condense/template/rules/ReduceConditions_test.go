@@ -11,6 +11,7 @@ func TestReduceConditions_Passthru_NonCondition(t *testing.T) {
 		[]interface{}{"x", "y"},
 		[]interface{}{"Conditions"},
 		[]interface{}{"Conditions", float64(1.0)},
+		[]interface{}{float64(1.0), "Conditions"},
 	}
 
 	input := interface{}(true)
