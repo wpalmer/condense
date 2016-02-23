@@ -234,7 +234,39 @@ func main() {
 	templateRules.Attach(rules.MakeFnIncludeFile(vfs.OS("/"), &templateRules))
 	templateRules.Attach(rules.ReduceConditions)
 
+	// First Pass (to collect Parameter names)
 	processed := template.Process(t, &templateRules)
+
+	parameterRefs := map[string]interface{}{}
+	if processedMap, ok := processed.(map[string]interface{}); ok {
+		if processedParameters, ok := processedMap["Parameters"]; ok {
+			if processedParametersMap, ok := processedParameters.(map[string]interface{}); ok {
+				for parameterName, _ := range processedParametersMap {
+					parameterRefs[parameterName] = map[string]interface{}{
+						"ParamRef": parameterName,
+					}
+				}
+			}
+		}
+	}
+
+	stack.Push(fallbackmap.DeepMap(parameterRefs))
+	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
+		key := interface{}(nil)
+		if len(path) > 0 { key = path[len(path)-1] }
+
+		if nodeMap, ok := node.(map[string]interface{}); !ok || len(nodeMap) != 1 {
+			return key, node //passthru
+		}
+
+		if refName, ok := node.(map[string]interface{})["ParamRef"]; ok {
+			return key, interface{}(map[string]interface{}{"Ref": interface{}(refName)})
+		}
+
+		return key, node
+	})
+	processed = template.Process(t, &templateRules)
+	stack.PopDiscard()
 
 	switch outputWhat.Get().what {
 	case OutputTemplate:
@@ -262,30 +294,25 @@ func main() {
 			enc.Encode(credentials)
 		}
 	case OutputParameters:
-		var templateParameters interface{}
-		var templateParameterMap map[string]interface{}
 		parameters := []cloudformation.Parameter{}
-		if templateParameters, ok = processed.(map[string]interface{})["Parameters"]; ok {
-			if templateParameterMap, ok = templateParameters.(map[string]interface{}); ok {
-				for name, _ := range templateParameterMap {
-					value, ok := sources.Get([]string{name})
-					if !ok {
-						continue
-					}
 
-					value = template.Process(value, &templateRules)
-
-					parameters = append(parameters, func(name string, value interface{}) cloudformation.Parameter {
-						stringval := fmt.Sprintf("%s", value)
-						boolval := false
-						return cloudformation.Parameter{
-							ParameterKey:     &name,
-							ParameterValue:   &stringval,
-							UsePreviousValue: &boolval,
-						}
-					}(name, value))
-				}
+		for name, _ := range parameterRefs {
+			value, ok := sources.Get([]string{name})
+			if !ok {
+				continue
 			}
+
+			value = template.Process(value, &templateRules)
+
+			parameters = append(parameters, func(name string, value interface{}) cloudformation.Parameter {
+				stringval := fmt.Sprintf("%s", value)
+				boolval := false
+				return cloudformation.Parameter{
+					ParameterKey:     &name,
+					ParameterValue:   &stringval,
+					UsePreviousValue: &boolval,
+				}
+			}(name, value))
 		}
 
 		enc := json.NewEncoder(os.Stdout)
