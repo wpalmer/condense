@@ -5,6 +5,7 @@ import (
 	"deepcloudformationoutputs"
 	"encoding/json"
 	"fallbackmap"
+	"deepstack"
 	"flag"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -242,9 +243,12 @@ func main() {
 		return nil, false
 	}))
 
+	stack := deepstack.DeepStack{}
+	stack.Push(&sources)
+
 	templateRules.AttachEarly(rules.ExcludeComments)
-	templateRules.AttachEarly(rules.MakeFnFor(&sources, &templateRules))
-	templateRules.AttachEarly(rules.MakeFnWith(&sources, &templateRules))
+	templateRules.AttachEarly(rules.MakeFnFor(&stack, &templateRules))
+	templateRules.AttachEarly(rules.MakeFnWith(&stack, &templateRules))
 	templateRules.Attach(rules.FnAdd)
 	templateRules.Attach(rules.FnIf)
 	templateRules.Attach(rules.FnAnd)
@@ -260,8 +264,8 @@ func main() {
 	templateRules.Attach(rules.FnSplit)
 	templateRules.Attach(rules.FnToEntries)
 	templateRules.Attach(rules.FnUnique)
-	templateRules.Attach(rules.MakeFnGetAtt(&sources, &templateRules))
-	templateRules.Attach(rules.MakeRef(&sources, &templateRules))
+	templateRules.Attach(rules.MakeFnGetAtt(&stack, &templateRules))
+	templateRules.Attach(rules.MakeRef(&stack, &templateRules))
 	templateRules.Attach(rules.ReduceConditions)
 
 	processed := template.Process(t, &templateRules)

@@ -1,20 +1,28 @@
 package rules
 
-func deepMerge(target map[string]interface{}, source map[string]interface{}, depth int) {
-	for key, value := range source {
-		if depth > 0 {
-			if _, ok := target[key]; ok {
-				if _, ok := target[key].(map[string]interface{}); ok {
-					if _, ok := value.(map[string]interface{}); ok {
-						deepMerge(target[key].(map[string]interface{}), value.(map[string]interface{}), depth - 1)
-						continue
+func deepMerge(depth int, maps ...map[string]interface{}) map[string]interface{} {
+	merged := make(map[string]interface{})
+	for _, oneMap := range maps {
+		for key, _ := range oneMap {
+			if depth > 0 {
+				if _, ok := merged[key]; ok {
+					if _, ok := merged[key].(map[string]interface{}); ok {
+						if _, ok := oneMap[key].(map[string]interface{}); ok {
+							merged[key] = deepMerge(depth - 1,
+								merged[key].(map[string]interface{}),
+								oneMap[key].(map[string]interface{}),
+							)
+							continue
+						}
 					}
 				}
 			}
-		}
 
-		target[key] = value
+			merged[key] = oneMap[key]
+		}
 	}
+
+	return merged
 }
 
 func FnMergeDeep(path []interface{}, node interface{}) (interface{}, interface{}) {
@@ -41,20 +49,23 @@ func FnMergeDeep(path []interface{}, node interface{}) (interface{}, interface{}
 	}
 	depth := int(depthFloat)
 
-	var maps []interface{}
-	if maps, ok = args[1].([]interface{}); !ok {
+	var mapsInterface []interface{}
+	if mapsInterface, ok = args[1].([]interface{}); !ok {
 		return key, node //passthru
 	}
 
-	merged := make(map[string]interface{})
-	for _, argInterface := range maps {
+	var merged map[string]interface{}
+	maps := []map[string]interface{}{ }
+
+	for _, argInterface := range mapsInterface {
 		var argMap map[string]interface{}
 		if argMap, ok = argInterface.(map[string]interface{}); !ok {
 			return key, node //can't merge non-maps, passthru
 		}
 
-		deepMerge(merged, argMap, depth)
+		maps = append(maps, argMap)
 	}
 
+	merged = deepMerge(depth, maps...)
 	return key, interface{}(merged)
 }

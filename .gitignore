@@ -1,4 +1,5 @@
 /condense
 /pkg/
 /src/github.com
+/src/golang.org
 coverage.out

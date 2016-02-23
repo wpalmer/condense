@@ -1,12 +1,12 @@
 package rules
 
 import (
+	"deepstack"
 	"fallbackmap"
 	"condense/template"
-	"deepalias"
 )
 
-func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) template.Rule {
+func MakeFnFor(sources *deepstack.DeepStack, templateRules *template.Rules) template.Rule {
 	return func (path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
 		if len(path) > 0 { key = path[len(path)-1] }
@@ -57,7 +57,6 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 		}
 
 		valuesInterface := args[1]
-		_, valuesInterface = template.Walk(path, valuesInterface, templateRules)
 
 		var values []interface{}
 		if values, ok = valuesInterface.([]interface{}); !ok {
@@ -66,11 +65,8 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 
 		loopTemplate := interface{}(args[2])
 
-		var generated []interface{}
+		generated := []interface{}{}
 		for deepIndex, value := range values {
-			loopTemplateSources := fallbackmap.FallbackMap{}
-			loopTemplateRules := template.Rules{}
-
 			refMap := make(map[string]interface{})
 			if refNames[0] != nil {
 				refMap[ refNames[0].(string) ] = float64(deepIndex)
@@ -80,23 +76,15 @@ func MakeFnFor(sources *fallbackmap.FallbackMap, templateRules *template.Rules) 
 				refMap[ refNames[1].(string) ] = value
 			}
 
-			loopTemplateSources.Attach(fallbackmap.DeepMap(refMap))
-
-			loopTemplateSources.Attach(deepalias.DeepAlias{&loopTemplateSources})
-			loopTemplateSources.Attach(sources)
-
-			loopTemplateRules.Attach(MakeRef(&loopTemplateSources, &loopTemplateRules))
-			loopTemplateRules.Attach(MakeFnGetAtt(&loopTemplateSources, &loopTemplateRules))
-			loopTemplateRules.Attach(templateRules.MakeEach())
-			loopTemplateRules.AttachEarly(MakeFnFor(&loopTemplateSources, &loopTemplateRules))
-			loopTemplateRules.AttachEarly(MakeFnWith(&loopTemplateSources, &loopTemplateRules))
-			loopTemplateRules.AttachEarly(templateRules.MakeEachEarly())
-
 			deepPath := make([]interface{}, len(path)+1)
 			copy(deepPath, path)
 			deepPath[cap(deepPath)-1] = interface{}(deepIndex)
 
-			newIndex, processed := template.Walk(deepPath, loopTemplate, &loopTemplateRules)
+			sources.Push(fallbackmap.DeepMap(refMap))
+
+			newIndex, processed := template.Walk(deepPath, loopTemplate, templateRules)
+			sources.PopDiscard()
+
 			if newIndex != nil {
 				generated = append(generated, processed)
 			}

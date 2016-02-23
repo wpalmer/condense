@@ -1,12 +1,12 @@
 package rules
 
 import (
+	"deepstack"
 	"fallbackmap"
 	"condense/template"
-	"deepalias"
 )
 
-func MakeFnWith(sources *fallbackmap.FallbackMap, outerRules *template.Rules) template.Rule {
+func MakeFnWith(sources *deepstack.DeepStack, outerRules *template.Rules) template.Rule {
 	return func (path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
 		if len(path) > 0 { key = path[len(path)-1] }
@@ -45,22 +45,11 @@ func MakeFnWith(sources *fallbackmap.FallbackMap, outerRules *template.Rules) te
 			return key, node //passthru
 		}
 
+		sources.Push(fallbackmap.DeepMap(source))
 		innerTemplate := interface{}(args[1])
-		templateSources := fallbackmap.FallbackMap{}
-		templateRules := template.Rules{}
+		key, generated := template.Walk(path, innerTemplate, outerRules)
+		sources.PopDiscard()
 
-		templateSources.Attach(fallbackmap.DeepMap(source))
-		templateSources.Attach(deepalias.DeepAlias{&templateSources})
-		templateSources.Attach(sources)
-
-		templateRules.Attach(MakeRef(&templateSources, &templateRules))
-		templateRules.Attach(MakeFnGetAtt(&templateSources, &templateRules))
-		templateRules.Attach(outerRules.MakeEach())
-		templateRules.AttachEarly(MakeFnFor(&templateSources, &templateRules))
-		templateRules.AttachEarly(MakeFnWith(&templateSources, &templateRules))
-		templateRules.AttachEarly(outerRules.MakeEachEarly())
-
-		key, generated := template.Walk(path, innerTemplate, &templateRules)
 		return key, interface{}(generated)
 	}
 }

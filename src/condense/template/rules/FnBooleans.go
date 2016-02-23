@@ -105,41 +105,30 @@ func FnOr(path []interface{}, node interface{}) (interface{}, interface{}) {
 		return key, node //passthru
 	}
 
+	hasTrue := false
 	for _, arg := range args {
 		var argBool bool
 		if argBool, ok = arg.(bool); !ok {
 			return key, node //passthru
 		}
 
-		if argBool {
-			return key, interface{}(true)
-		}
+		hasTrue = hasTrue || argBool
 	}
 
-	return key, interface{}(false)
+	return key, interface{}(hasTrue)
 }
 
 func FnNot(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
 	if len(path) > 0 { key = path[len(path)-1] }
 
-	argsInterface, ok := singleKey(node, "Fn::Not")
+	argInterface, ok := singleKey(node, "Fn::Not")
 	if !ok {
 		return key, node //passthru
 	}
 
-	var args []interface{}
-	if args, ok = argsInterface.([]interface{}); !ok {
-		return key, node //passthru
-	}
-
-	if len(args) != 1 {
-		return key, node //passthru
-	}
-
-	arg := args[0]
 	var argBool bool
-	if argBool, ok = arg.(bool); !ok {
+	if argBool, ok = argInterface.(bool); !ok {
 		return key, node //passthru
 	}
 
