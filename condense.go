@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"golang.org/x/tools/godoc/vfs"
 	"io"
 	"os"
 	"strings"
@@ -230,6 +231,7 @@ func main() {
 	templateRules.Attach(rules.FnUnique)
 	templateRules.Attach(rules.MakeFnGetAtt(&stack, &templateRules))
 	templateRules.Attach(rules.MakeRef(&stack, &templateRules))
+	templateRules.Attach(rules.MakeFnIncludeFile(vfs.OS("/"), &templateRules))
 	templateRules.Attach(rules.ReduceConditions)
 
 	processed := template.Process(t, &templateRules)
