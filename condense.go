@@ -218,10 +218,12 @@ func main() {
 	components := make(map[string]*map[string]interface{})
 
 	sources := fallbackmap.FallbackMap{}
+	stack := deepstack.DeepStack{}
+
 	templateRules := template.Rules{}
 
 	sources.Attach(inputParameters.Get())
-	sources.Attach(deepalias.DeepAlias{&sources})
+	sources.Attach(deepalias.DeepAlias{&stack})
 	sources.Attach(deepcloudformationoutputs.NewDeepCloudFormationOutputs("eu-west-1"))
 	sources.Attach(fallbackmap.DeepFunc(func(path []string) (interface{}, bool) {
 		var ok bool
@@ -243,7 +245,6 @@ func main() {
 		return nil, false
 	}))
 
-	stack := deepstack.DeepStack{}
 	stack.Push(&sources)
 
 	templateRules.AttachEarly(rules.ExcludeComments)
