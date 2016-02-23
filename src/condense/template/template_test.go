@@ -236,6 +236,8 @@ func TestUnsupportedType(t *testing.T) {
 
 	testRules := Rules{}
 	_ = Process(input, &testRules)
+
+	t.Fatalf("Processing with an Unsupported type did not panic")
 }
 
 func TestMultiple(t *testing.T) {
