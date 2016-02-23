@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"io"
 	"os"
-	"path"
 	"strings"
 
 	"condense/template"

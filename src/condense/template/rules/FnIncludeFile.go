@@ -6,6 +6,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 	"io"
 	"encoding/json"
+	"path/filepath"
 )
 
 func MakeFnIncludeFile(opener vfs.Opener, rules *template.Rules) template.Rule {
@@ -23,10 +24,15 @@ func MakeFnIncludeFile(opener vfs.Opener, rules *template.Rules) template.Rule {
 			return key, node //passthru
 		}
 
-		var jsonStream io.Reader
+		var absPath string
 		var err error
-		if jsonStream, err = opener.Open(argString); err != nil {
+		if absPath, err = filepath.Abs(argString); err != nil {
 			panic(fmt.Errorf("Error opening imported file '%s': %s", argString, err))
+		}
+
+		var jsonStream io.Reader
+		if jsonStream, err = opener.Open(absPath); err != nil {
+			panic(fmt.Errorf("Error opening imported file '%s': %s", absPath, err))
 		}
 
 		dec := json.NewDecoder(jsonStream)
