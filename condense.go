@@ -166,21 +166,6 @@ func (f *OutputWhatFlag) Set(input string) error {
 	return nil
 }
 
-func getComponent(name string, templateRules *template.Rules) (*map[string]interface{}, bool) {
-	filename := path.Join("components", strings.Join([]string{name, "json"}, "."))
-	reader, err := os.Open(filename)
-	if os.IsNotExist(err) {
-		return nil, false
-	}
-
-	var t map[string]interface{}
-	decoder := json.NewDecoder(reader)
-	decoder.Decode(&t)
-
-	t = template.Process(interface{}(t), templateRules).(map[string]interface{})
-	return &t, true
-}
-
 func main() {
 	var templateFilename string
 	var outputWhat OutputWhatFlag
@@ -215,8 +200,6 @@ func main() {
 		panic(err)
 	}
 
-	components := make(map[string]*map[string]interface{})
-
 	sources := fallbackmap.FallbackMap{}
 	stack := deepstack.DeepStack{}
 
@@ -225,25 +208,6 @@ func main() {
 	sources.Attach(inputParameters.Get())
 	sources.Attach(deepalias.DeepAlias{&stack})
 	sources.Attach(deepcloudformationoutputs.NewDeepCloudFormationOutputs("eu-west-1"))
-	sources.Attach(fallbackmap.DeepFunc(func(path []string) (interface{}, bool) {
-		var ok bool
-		var component *map[string]interface{}
-
-		if len(path) < 1 {
-			return nil, false
-		}
-
-		// if all else fails, try a component (always return nothing)
-		if _, ok = components[path[0]]; ok {
-			return nil, false // already loaded
-		}
-
-		if component, ok = getComponent(path[0], &templateRules); ok {
-			components[path[0]] = component
-		}
-
-		return nil, false
-	}))
 
 	stack.Push(&sources)
 
@@ -270,19 +234,6 @@ func main() {
 	templateRules.Attach(rules.ReduceConditions)
 
 	processed := template.Process(t, &templateRules)
-
-	var ok bool
-	for _, component := range components {
-		for subcomponentType, subcomponents := range *component { // eg: "Resource", "Parameter", etc
-			for subcomponentKey, subcomponent := range subcomponents.(map[string]interface{}) {
-				if _, ok = processed.(map[string]interface{})[subcomponentType]; !ok {
-					processed.(map[string]interface{})[subcomponentType] = interface{}(subcomponents)
-				} else {
-					processed.(map[string]interface{})[subcomponentType].(map[string]interface{})[subcomponentKey] = subcomponent
-				}
-			}
-		}
-	}
 
 	switch outputWhat.Get().what {
 	case OutputTemplate:
