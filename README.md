@@ -36,6 +36,28 @@ condense --template=./stack.json --parameters=parameters.json
 }
 ```
 
+## Command-Line Arguments
+
+#### --template \<filename\>
+
+The template file to process (defaults to stdin)
+
+#### --parameters \<filename\>
+
+Parameters file to expose to the template. This is in the form of a JSON object,
+containing `{"aReference": "aValue"}`, to be referenced via
+`{"Ref": "aReference"}`. Can be specified multiple times, to attach overrides.
+
+#### --output \<type\>
+
+What to output. Defaults to "template". Valid values are:
+
+|type|Output|
+|--------------------|-------------------------------|
+| template | the processed template |
+| parameters | the "Parameter" values, for passing in to a cloudformation `create` or `update` operation. |
+| credentials | a merged representation of all --parameters files, for passing in to other parts of the chain |
+
 ## Rules
 
 The template preprocessor visits each node in the template, passing each
