@@ -3,6 +3,7 @@ package main
 import (
 	"deepalias"
 	"deepcloudformationoutputs"
+	"deepcloudformationresources"
 	"encoding/json"
 	"fallbackmap"
 	"deepstack"
@@ -208,6 +209,7 @@ func main() {
 	sources.Attach(inputParameters.Get())
 	sources.Attach(deepalias.DeepAlias{&stack})
 	sources.Attach(deepcloudformationoutputs.NewDeepCloudFormationOutputs("eu-west-1"))
+	sources.Attach(deepcloudformationresources.NewDeepCloudFormationResources("eu-west-1"))
 
 	stack.Push(&sources)
 
