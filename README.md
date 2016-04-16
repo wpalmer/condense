@@ -195,6 +195,17 @@ Outputs:
 ["b", "a"]
 ```
 
+### FnLength
+
+Return the length of an array. eg:
+```json
+{"Fn::Length": ["a", "b", "c"]}
+```
+Outputs:
+```json
+3
+```
+
 ### FnMerge
 
 Perform a simple merge of the upper-most keys of an object, eg:

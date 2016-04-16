@@ -226,6 +226,7 @@ func main() {
 	templateRules.Attach(rules.FnFromEntries)
 	templateRules.Attach(rules.FnJoin)
 	templateRules.Attach(rules.FnKeys)
+	templateRules.Attach(rules.FnLength)
 	templateRules.Attach(rules.FnMerge)
 	templateRules.Attach(rules.FnMergeDeep)
 	templateRules.Attach(rules.FnSplit)
