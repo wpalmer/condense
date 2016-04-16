@@ -229,6 +229,7 @@ func main() {
 	templateRules.Attach(rules.FnLength)
 	templateRules.Attach(rules.FnMerge)
 	templateRules.Attach(rules.FnMergeDeep)
+	templateRules.Attach(rules.FnMod)
 	templateRules.Attach(rules.FnSplit)
 	templateRules.Attach(rules.FnToEntries)
 	templateRules.Attach(rules.FnUnique)
