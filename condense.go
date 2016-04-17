@@ -236,6 +236,7 @@ func main() {
 	templateRules.Attach(rules.MakeFnGetAtt(&stack, &templateRules))
 	templateRules.Attach(rules.MakeRef(&stack, &templateRules))
 	templateRules.Attach(rules.MakeFnIncludeFile(vfs.OS("/"), &templateRules))
+	templateRules.Attach(rules.MakeFnIncludeFileRaw(vfs.OS("/")))
 	templateRules.Attach(rules.ReduceConditions)
 
 	// First Pass (to collect Parameter names)

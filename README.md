@@ -168,8 +168,13 @@ functions such as `Fn::For` and `Fn::With`
 ### FnIncludeFile
 
 Reference an external file, adding it (as its JSON interpretation) to the
-emplate. This function will panic if the file is not found, or is not valid
+template. This function will panic if the file is not found, or is not valid
 JSON.
+
+### FnIncludeFileRaw
+
+Reference an external file, adding it (as a JSON string) to the
+template. This function will panic if the file is not found.
 
 ### FnJoin
 
