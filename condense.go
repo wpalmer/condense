@@ -4,9 +4,9 @@ import (
 	"deepalias"
 	"deepcloudformationoutputs"
 	"deepcloudformationresources"
+	"deepstack"
 	"encoding/json"
 	"fallbackmap"
-	"deepstack"
 	"flag"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
@@ -21,7 +21,7 @@ import (
 
 type inputSource struct {
 	filename string
-	data map[string]interface{}
+	data     map[string]interface{}
 }
 
 type InputsFlag struct {
@@ -224,6 +224,7 @@ func main() {
 	templateRules.Attach(rules.FnEquals)
 	templateRules.Attach(rules.FnConcat)
 	templateRules.Attach(rules.FnFromEntries)
+	templateRules.Attach(rules.FnHasKey)
 	templateRules.Attach(rules.FnJoin)
 	templateRules.Attach(rules.FnKeys)
 	templateRules.Attach(rules.FnLength)

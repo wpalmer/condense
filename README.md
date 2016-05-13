@@ -165,6 +165,19 @@ the added abilities of being able to reference locally-provided
 parameters, external CloudFormation stacks, and bound variables from
 functions such as `Fn::For` and `Fn::With`
 
+### FnHasKey
+
+Returns a Boolean indicating whether or not the specified object
+contains the specified key, eg:
+```json
+{"Fn::HasKey": ["needle", {"needle": "inAHaystack"}]}
+```
+
+Outputs:
+```json
+true
+```
+
 ### FnIncludeFile
 
 Reference an external file, adding it (as its JSON interpretation) to the
