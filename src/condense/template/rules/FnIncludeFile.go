@@ -2,17 +2,19 @@ package rules
 
 import (
 	"condense/template"
+	"encoding/json"
 	"fmt"
 	"golang.org/x/tools/godoc/vfs"
 	"io"
-	"encoding/json"
 	"path/filepath"
 )
 
 func MakeFnIncludeFile(opener vfs.Opener, rules *template.Rules) template.Rule {
-	return func(path []interface{}, node interface{}) (interface{}, interface{}){
+	return func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		argInterface, ok := singleKey(node, "Fn::IncludeFile")
 		if !ok {

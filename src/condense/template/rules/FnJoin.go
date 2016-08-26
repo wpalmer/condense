@@ -1,13 +1,15 @@
 package rules
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 func FnJoin(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::Join")
 	if !ok {

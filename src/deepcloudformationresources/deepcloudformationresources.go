@@ -3,22 +3,22 @@ package deepcloudformationresources
 import (
 	"fallbackmap"
 	"fmt"
-	"regexp"
-	"os"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
+	"os"
+	"regexp"
 )
 
 func NewDeepCloudFormationResources(region string) *DeepCloudFormationResources {
 	return &DeepCloudFormationResources{
 		Region: region,
-		cache: map[string]fallbackmap.Deep{},
+		cache:  map[string]fallbackmap.Deep{},
 	}
 }
 
 type DeepCloudFormationResources struct {
 	Region string
-	cache map[string]fallbackmap.Deep
+	cache  map[string]fallbackmap.Deep
 }
 
 func isValidStackName(candidate string) bool {

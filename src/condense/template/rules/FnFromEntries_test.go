@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnFromEntries_Passthru_NonMatching(t *testing.T) {
@@ -49,7 +49,7 @@ func TestFnFromEntries_Basic(t *testing.T) {
 	})
 
 	expected := map[string]interface{}{
-		"firstKey": "firstValue",
+		"firstKey":  "firstValue",
 		"secondKey": "secondValue",
 	}
 

@@ -1,4 +1,5 @@
 package template
+
 import (
 	"fmt"
 )
@@ -41,13 +42,13 @@ func eachRule(path []interface{}, node interface{}, rules []Rule) (newKey interf
 }
 
 func (r *Rules) MakeEachEarly() Rule {
-	return func (path []interface{}, node interface{}) (newKey interface{}, newNode interface{}) {
+	return func(path []interface{}, node interface{}) (newKey interface{}, newNode interface{}) {
 		return eachRule(path, node, r.Early)
 	}
 }
 
 func (r *Rules) MakeEach() Rule {
-	return func (path []interface{}, node interface{}) (newKey interface{}, newNode interface{}) {
+	return func(path []interface{}, node interface{}) (newKey interface{}, newNode interface{}) {
 		return eachRule(path, node, r.Depth)
 	}
 }

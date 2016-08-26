@@ -6,7 +6,9 @@ import (
 
 func FnIf(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::If")
 	if !ok {
@@ -36,7 +38,9 @@ func FnIf(path []interface{}, node interface{}) (interface{}, interface{}) {
 
 func FnEquals(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::Equals")
 	if !ok {
@@ -57,7 +61,9 @@ func FnEquals(path []interface{}, node interface{}) (interface{}, interface{}) {
 
 func FnAnd(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::And")
 	if !ok {
@@ -89,7 +95,9 @@ func FnAnd(path []interface{}, node interface{}) (interface{}, interface{}) {
 
 func FnOr(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::Or")
 	if !ok {
@@ -120,7 +128,9 @@ func FnOr(path []interface{}, node interface{}) (interface{}, interface{}) {
 
 func FnNot(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argInterface, ok := singleKey(node, "Fn::Not")
 	if !ok {

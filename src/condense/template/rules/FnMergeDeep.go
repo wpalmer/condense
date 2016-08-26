@@ -8,7 +8,7 @@ func deepMerge(depth int, maps ...map[string]interface{}) map[string]interface{}
 				if _, ok := merged[key]; ok {
 					if _, ok := merged[key].(map[string]interface{}); ok {
 						if _, ok := oneMap[key].(map[string]interface{}); ok {
-							merged[key] = deepMerge(depth - 1,
+							merged[key] = deepMerge(depth-1,
 								merged[key].(map[string]interface{}),
 								oneMap[key].(map[string]interface{}),
 							)
@@ -27,7 +27,9 @@ func deepMerge(depth int, maps ...map[string]interface{}) map[string]interface{}
 
 func FnMergeDeep(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::MergeDeep")
 	if !ok {
@@ -55,7 +57,7 @@ func FnMergeDeep(path []interface{}, node interface{}) (interface{}, interface{}
 	}
 
 	var merged map[string]interface{}
-	maps := []map[string]interface{}{ }
+	maps := []map[string]interface{}{}
 
 	for _, argInterface := range mapsInterface {
 		var argMap map[string]interface{}

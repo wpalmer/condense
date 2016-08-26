@@ -2,7 +2,9 @@ package rules
 
 func ExcludeComments(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	var ok bool
 	var nodeMap map[string]interface{}

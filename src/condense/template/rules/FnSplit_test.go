@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnSplit_Passthru_NonMatching(t *testing.T) {
@@ -69,7 +69,7 @@ func TestFnSplit_Basic(t *testing.T) {
 	input := interface{}(map[string]interface{}{
 		"Fn::Split": []interface{}{",", "a,b,c,d"},
 	})
-	
+
 	expected := []interface{}{"a", "b", "c", "d"}
 
 	newKey, newNode := FnSplit([]interface{}{"x", "y"}, input)

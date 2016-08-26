@@ -1,12 +1,12 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func inputTypes() []interface{} {
-	return []interface{} {
+	return []interface{}{
 		interface{}("aString"),
 		interface{}(true),
 		interface{}(1),
@@ -24,10 +24,10 @@ func inputTypes() []interface{} {
 		}),
 		interface{}(map[string]interface{}{
 			"string": interface{}("aString"),
-			"bool": interface{}(true),
-			"int": interface{}(1),
-			"float": interface{}(1.0),
-			"nil": interface{}(nil),
+			"bool":   interface{}(true),
+			"int":    interface{}(1),
+			"float":  interface{}(1.0),
+			"nil":    interface{}(nil),
 			"array": interface{}([]interface{}{
 				interface{}("aString"),
 				interface{}(true),
@@ -61,9 +61,9 @@ func TestExcludeComments_Passthru_NonComment(t *testing.T) {
 
 func TestExcludeComments_FromMap(t *testing.T) {
 	input := interface{}(map[string]interface{}{
-		"a": "noExclude-a",
+		"a":        "noExclude-a",
 		"$comment": "exclude",
-		"b": "noExclude-b",
+		"b":        "noExclude-b",
 	})
 
 	expected := interface{}(map[string]interface{}{

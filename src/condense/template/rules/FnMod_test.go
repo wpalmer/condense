@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnMod_Passthru_NonMatching(t *testing.T) {
@@ -14,34 +14,34 @@ func TestFnMod_Passthru_NonArgsList(t *testing.T) {
 }
 
 func TestFnMod_Passthru_WrongNumberOfArguments(t *testing.T) {
-        inputs := [][]interface{}{
-                []interface{}{float64(15), float64(5), float64(2)},
-                []interface{}{float64(15)},
-        }
+	inputs := [][]interface{}{
+		[]interface{}{float64(15), float64(5), float64(2)},
+		[]interface{}{float64(15)},
+	}
 
-        for _, input := range inputs {
-                input := interface{}(map[string]interface{}{
-                        "Fn::Mod": input,
-                })
+	for _, input := range inputs {
+		input := interface{}(map[string]interface{}{
+			"Fn::Mod": input,
+		})
 
-                newKey, newNode := FnMod([]interface{}{"x", "y"}, input)
-                if newKey != "y" {
-                        t.Fatalf("FnMod modified the path (%v instead of %v)", newKey, "y")
-                }
+		newKey, newNode := FnMod([]interface{}{"x", "y"}, input)
+		if newKey != "y" {
+			t.Fatalf("FnMod modified the path (%v instead of %v)", newKey, "y")
+		}
 
-                if !reflect.DeepEqual(newNode, input) {
-                        t.Fatalf("FnMod of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
-                }
-        }
+		if !reflect.DeepEqual(newNode, input) {
+			t.Fatalf("FnMod of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
+		}
+	}
 }
 
 func TestFnMod_Passthru_NonNumber(t *testing.T) {
-        inputs := [][]interface{}{
+	inputs := [][]interface{}{
 		[]interface{}{float64(1.0), "non-number"},
 		[]interface{}{"non-number", float64(1.0)},
-        }
+	}
 
-        for _, input := range inputs {
+	for _, input := range inputs {
 		input := interface{}(map[string]interface{}{
 			"Fn::Mod": input,
 		})

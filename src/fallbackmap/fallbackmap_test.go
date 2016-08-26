@@ -118,7 +118,7 @@ func TestDeepAttach(t *testing.T) {
 	o := map[string]interface{}{
 		"aStack": map[string]interface{}{
 			"Outputs": map[string]interface{}{
-				"overriddenOutputValue": "was-not-overridden",
+				"overriddenOutputValue":    "was-not-overridden",
 				"nonOverriddenOutputValue": "never-tried-to-override",
 			},
 		},

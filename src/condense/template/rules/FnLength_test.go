@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnLength_Passthru_NonMatching(t *testing.T) {
@@ -16,7 +16,7 @@ func TestFnLength_Passthru_NonList(t *testing.T) {
 func TestFnLength_Basic(t *testing.T) {
 	testData := [][]interface{}{
 		[]interface{}{},
-		[]interface{}{"a","b","c"},
+		[]interface{}{"a", "b", "c"},
 	}
 
 	expected := []interface{}{

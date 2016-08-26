@@ -2,9 +2,9 @@ package rules
 
 import (
 	"condense/template"
-	"testing"
 	"path"
 	"reflect"
+	"testing"
 
 	"golang.org/x/tools/godoc/vfs/mapfs"
 )

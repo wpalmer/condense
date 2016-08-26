@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnIf_Passthru_NonMatching(t *testing.T) {

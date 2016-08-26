@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnMergeDeep_Passthru_NonMatching(t *testing.T) {
@@ -106,7 +106,7 @@ func TestFnMergeDeep_Basic(t *testing.T) {
 			},
 		},
 	})
-	
+
 	expected := interface{}(map[string]interface{}{
 		"a": "firstValue",
 		"b": "maskingValue",
@@ -160,7 +160,7 @@ func TestFnMergeDeep_Depth(t *testing.T) {
 			},
 		},
 	}
-	
+
 	expected := []interface{}{
 		map[string]interface{}{
 			"a": "firstValue",
@@ -213,7 +213,7 @@ func TestFnMergeDeep_Depth(t *testing.T) {
 		newKey, newNode := FnMergeDeep(
 			[]interface{}{"x", "y"},
 			interface{}(map[string]interface{}{
-				"Fn::MergeDeep": []interface{}{ interface{}(float64(i)), input },
+				"Fn::MergeDeep": []interface{}{interface{}(float64(i)), input},
 			}),
 		)
 

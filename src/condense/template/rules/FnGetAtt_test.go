@@ -1,11 +1,11 @@
 package rules
 
 import (
-	"testing"
-	"reflect"
 	"condense/template"
 	"deepstack"
 	"fallbackmap"
+	"reflect"
+	"testing"
 )
 
 func testMakeGetAtt(stack deepstack.DeepStack, rules template.Rules) template.Rule {
@@ -43,11 +43,11 @@ func TestFnGetAtt_Passthru_Unbound(t *testing.T) {
 
 func TestFnGetAtt_Passthru_WrongNumberOfArguments(t *testing.T) {
 	stack := deepstack.DeepStack{}
-	stack.Push( fallbackmap.DeepMap(map[string]interface{}{
+	stack.Push(fallbackmap.DeepMap(map[string]interface{}{
 		"FakeResource": map[string]interface{}{
 			"FakeProperty": "FakeValue",
 		},
-	}) )
+	}))
 	templateRules := template.Rules{}
 
 	fnGetAtt := MakeFnGetAtt(&stack, &templateRules)
@@ -75,13 +75,13 @@ func TestFnGetAtt_Passthru_WrongNumberOfArguments(t *testing.T) {
 
 func TestFnGetAtt_Passthru_NonStringArguments(t *testing.T) {
 	stack := deepstack.DeepStack{}
-	stack.Push( fallbackmap.DeepMap(map[string]interface{}{
+	stack.Push(fallbackmap.DeepMap(map[string]interface{}{
 		"FakeResource": map[string]interface{}{
 			"FakeProperty": "FakeValue",
 		},
-	}) )
+	}))
 	templateRules := template.Rules{}
-	
+
 	inputs := []interface{}{
 		[]interface{}{"FakeResource", 1},
 		[]interface{}{1, "FakeProperty"},
@@ -106,13 +106,13 @@ func TestFnGetAtt_Passthru_NonStringArguments(t *testing.T) {
 
 func TestFnGetAtt_Basic(t *testing.T) {
 	stack := deepstack.DeepStack{}
-	stack.Push( fallbackmap.DeepMap(map[string]interface{}{
+	stack.Push(fallbackmap.DeepMap(map[string]interface{}{
 		"FakeResource": map[string]interface{}{
 			"FakeProperty": map[string]interface{}{"FakeSub": "FakeValue"},
 		},
-	}) )
+	}))
 	templateRules := template.Rules{}
-	
+
 	inputs := []interface{}{
 		[]interface{}{"FakeResource", "FakeProperty"},
 		[]interface{}{"FakeResource", "FakeProperty.FakeSub"},
@@ -142,23 +142,25 @@ func TestFnGetAtt_Basic(t *testing.T) {
 
 func TestFnGetAtt_ProcessBound(t *testing.T) {
 	stack := deepstack.DeepStack{}
-	stack.Push( fallbackmap.DeepMap(map[string]interface{}{
+	stack.Push(fallbackmap.DeepMap(map[string]interface{}{
 		"FakeResource": map[string]interface{}{
 			"FakeProperty": map[string]interface{}{"FakeSub": "FakeValue"},
 		},
-	}) )
+	}))
 	templateRules := template.Rules{}
-	templateRules.Attach( func(path []interface{}, node interface{}) (interface{}, interface{}) {
+	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		if stringVal, ok := node.(string); ok && stringVal == "FakeValue" {
 			return key, interface{}("ProcessedFakeValue")
 		}
 
 		return key, node
-	} )
-	
+	})
+
 	inputs := []interface{}{
 		[]interface{}{"FakeResource", "FakeProperty.FakeSub"},
 	}

@@ -11,11 +11,11 @@ type Deep interface {
 type DeepMap map[string]interface{}
 type DeepFunc func(path []string) (value interface{}, has_key bool)
 type DeepSingle struct {
-	path []string
+	path  []string
 	value interface{}
 }
 
-var DeepNil = DeepFunc(func(path []string) (value interface{}, has_key bool){
+var DeepNil = DeepFunc(func(path []string) (value interface{}, has_key bool) {
 	return nil, false
 })
 
@@ -24,7 +24,7 @@ func (deep DeepFunc) Get(path []string) (value interface{}, has_key bool) {
 }
 
 func NewDeepSingle(path []string, value interface{}) DeepSingle {
-	return DeepSingle {path, value}
+	return DeepSingle{path, value}
 }
 
 func (deep DeepSingle) Get(path []string) (value interface{}, has_key bool) {

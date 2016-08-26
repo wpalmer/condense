@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnMerge_Passthru_NonMatching(t *testing.T) {
@@ -39,7 +39,7 @@ func TestFnMerge_Basic(t *testing.T) {
 			map[string]interface{}{"d": "otherAddedValue"},
 		},
 	})
-	
+
 	expected := interface{}(map[string]interface{}{
 		"a": "firstValue",
 		"b": "maskingValue",

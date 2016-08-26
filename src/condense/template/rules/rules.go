@@ -18,7 +18,7 @@ func singleKey(candidate interface{}, test string) (interface{}, bool) {
 	if candidateMap, ok = candidate.(map[string]interface{}); !ok {
 		return nil, false
 	}
-	
+
 	if len(candidateMap) != 1 {
 		return nil, false
 	}

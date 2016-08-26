@@ -2,7 +2,9 @@ package rules
 
 func FnToEntries(path []interface{}, node interface{}) (interface{}, interface{}) {
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	argsInterface, ok := singleKey(node, "Fn::ToEntries")
 	if !ok {
@@ -17,7 +19,7 @@ func FnToEntries(path []interface{}, node interface{}) (interface{}, interface{}
 	var entries []interface{}
 	for deepKey, deepValue := range argMap {
 		entries = append(entries, interface{}(map[string]interface{}{
-			"key": deepKey,
+			"key":   deepKey,
 			"value": deepValue,
 		}))
 	}

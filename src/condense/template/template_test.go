@@ -1,13 +1,13 @@
 package template
 
 import (
-	"testing"
-	"reflect"
 	"fmt"
+	"reflect"
+	"testing"
 )
 
 func inputTypes() []interface{} {
-	return []interface{} {
+	return []interface{}{
 		interface{}("aString"),
 		interface{}(true),
 		interface{}(1),
@@ -25,10 +25,10 @@ func inputTypes() []interface{} {
 		}),
 		interface{}(map[string]interface{}{
 			"string": interface{}("aString"),
-			"bool": interface{}(true),
-			"int": interface{}(1),
-			"float": interface{}(1.0),
-			"nil": interface{}(nil),
+			"bool":   interface{}(true),
+			"int":    interface{}(1),
+			"float":  interface{}(1.0),
+			"nil":    interface{}(nil),
 			"array": interface{}([]interface{}{
 				interface{}("aString"),
 				interface{}(true),
@@ -63,7 +63,9 @@ func TestOverrideData(t *testing.T) {
 	replacement := "overridden"
 	testRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		return key, replacement
 	})
@@ -82,7 +84,9 @@ func TestOverrideMapKey(t *testing.T) {
 	replacement := "overridden"
 	testRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		if _, ok := key.(string); ok {
 			return fmt.Sprintf("%s->%s", key.(string), replacement), node
@@ -93,10 +97,10 @@ func TestOverrideMapKey(t *testing.T) {
 
 	input := interface{}(map[string]interface{}{
 		"string": interface{}("aString"),
-		"bool": interface{}(true),
-		"int": interface{}(1),
-		"float": interface{}(1.0),
-		"nil": interface{}(nil),
+		"bool":   interface{}(true),
+		"int":    interface{}(1),
+		"float":  interface{}(1.0),
+		"nil":    interface{}(nil),
 		"array": interface{}([]interface{}{
 			interface{}("aString"),
 			interface{}(true),
@@ -114,10 +118,10 @@ func TestOverrideMapKey(t *testing.T) {
 
 	expected := interface{}(map[string]interface{}{
 		"string->overridden": interface{}("aString"),
-		"bool->overridden": interface{}(true),
-		"int->overridden": interface{}(1),
-		"float->overridden": interface{}(1.0),
-		"nil->overridden": interface{}(nil),
+		"bool->overridden":   interface{}(true),
+		"int->overridden":    interface{}(1),
+		"float->overridden":  interface{}(1.0),
+		"nil->overridden":    interface{}(nil),
 		"array->overridden": interface{}([]interface{}{
 			interface{}("aString"),
 			interface{}(true),
@@ -143,11 +147,13 @@ func TestSkipSome(t *testing.T) {
 	testRules := Rules{}
 	testRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		if reflect.DeepEqual(path, []interface{}{"b"}) ||
-		   reflect.DeepEqual(path, []interface{}{"d", "db"}) ||
-		   reflect.DeepEqual(path, []interface{}{"arr", 1}) {
+			reflect.DeepEqual(path, []interface{}{"d", "db"}) ||
+			reflect.DeepEqual(path, []interface{}{"arr", 1}) {
 			return true, nil
 		}
 
@@ -174,21 +180,22 @@ func TestSkipSomeEarly(t *testing.T) {
 	testRules := Rules{}
 	testRules.AttachEarly(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		if reflect.DeepEqual(path, []interface{}{"c"}) ||
-		   reflect.DeepEqual(path, []interface{}{"d"}) ||
-		   reflect.DeepEqual(path, []interface{}{"arr"}) {
+			reflect.DeepEqual(path, []interface{}{"d"}) ||
+			reflect.DeepEqual(path, []interface{}{"arr"}) {
 			return true, nil
 		}
 
-		if
-		   reflect.DeepEqual(path, []interface{}{"d", "da"}) ||
-		   reflect.DeepEqual(path, []interface{}{"d", "db"}) ||
-		   reflect.DeepEqual(path, []interface{}{"d", "dc"}) ||
-		   reflect.DeepEqual(path, []interface{}{"arr", 0}) ||
-		   reflect.DeepEqual(path, []interface{}{"arr", 1}) ||
-		   reflect.DeepEqual(path, []interface{}{"arr", 2}) {
+		if reflect.DeepEqual(path, []interface{}{"d", "da"}) ||
+			reflect.DeepEqual(path, []interface{}{"d", "db"}) ||
+			reflect.DeepEqual(path, []interface{}{"d", "dc"}) ||
+			reflect.DeepEqual(path, []interface{}{"arr", 0}) ||
+			reflect.DeepEqual(path, []interface{}{"arr", 1}) ||
+			reflect.DeepEqual(path, []interface{}{"arr", 2}) {
 			t.Fatalf("Walking with an \"early skip\" rule still processed deep node %v", path)
 		}
 
@@ -292,7 +299,7 @@ func TestMultipleWrap(t *testing.T) {
 	})
 
 	testRulesWrapped := Rules{}
-	testRulesWrapped.Attach( testRules.MakeEach() )
+	testRulesWrapped.Attach(testRules.MakeEach())
 
 	newNode := Process(interface{}("a"), &testRulesWrapped)
 	if !reflect.DeepEqual(newNode, "replacement-two") {
@@ -314,7 +321,7 @@ func TestMultipleEarlyWrap(t *testing.T) {
 	})
 
 	testRulesWrapped := Rules{}
-	testRulesWrapped.AttachEarly( testRules.MakeEachEarly() )
+	testRulesWrapped.AttachEarly(testRules.MakeEachEarly())
 
 	newNode := Process(interface{}("a"), &testRulesWrapped)
 	if !reflect.DeepEqual(newNode, "replacement-two") {

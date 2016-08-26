@@ -1,15 +1,17 @@
 package rules
 
 import (
+	"condense/template"
 	"deepstack"
 	"fallbackmap"
-	"condense/template"
 )
 
 func MakeFnWith(sources *deepstack.DeepStack, outerRules *template.Rules) template.Rule {
-	return func (path []interface{}, node interface{}) (interface{}, interface{}) {
+	return func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		raw, ok := singleKey(node, "Fn::With")
 		if !ok {
@@ -19,9 +21,9 @@ func MakeFnWith(sources *deepstack.DeepStack, outerRules *template.Rules) templa
 		args, ok := collectArgs(
 			raw,
 			func(argsSoFar []interface{}) bool {
-				return len(argsSoFar) < 2;
+				return len(argsSoFar) < 2
 			},
-			func(argsSoFar []interface{}, arg interface{}) (bool, interface{}){
+			func(argsSoFar []interface{}, arg interface{}) (bool, interface{}) {
 				// unconditionally process the argument, in case it needs to be skipped
 				key, node := template.Walk(path, arg, outerRules)
 				if skip, ok := key.(bool); ok && skip {

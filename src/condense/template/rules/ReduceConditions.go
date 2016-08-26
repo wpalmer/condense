@@ -3,7 +3,9 @@ package rules
 func ReduceConditions(path []interface{}, node interface{}) (interface{}, interface{}) {
 	var ok bool
 	key := interface{}(nil)
-	if len(path) > 0 { key = path[len(path)-1] }
+	if len(path) > 0 {
+		key = path[len(path)-1]
+	}
 
 	if len(path) < 2 || !isEqualString(path[0], "Conditions") {
 		return key, node //passthru

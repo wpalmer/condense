@@ -1,15 +1,17 @@
 package rules
 
 import (
-	"fallbackmap"
-	"deepalias"
 	"condense/template"
+	"deepalias"
+	"fallbackmap"
 )
 
 func MakeRef(sources fallbackmap.Deep, rules *template.Rules) template.Rule {
-	return func(path []interface{}, node interface{}) (interface{}, interface{}){
+	return func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		argInterface, ok := singleKey(node, "Ref")
 		if !ok {
@@ -33,7 +35,7 @@ func MakeRef(sources fallbackmap.Deep, rules *template.Rules) template.Rule {
 			newKey, newNode = template.Walk(path, newNode, rules)
 			return newKey, newNode
 		}
-		
+
 		return key, node //passthru (ref not found)
 	}
 }

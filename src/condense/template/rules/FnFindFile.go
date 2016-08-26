@@ -8,14 +8,16 @@ import (
 	fspath "path"
 )
 
-type Stater interface{
+type Stater interface {
 	Stat(path string) (os.FileInfo, error)
 }
 
 func MakeFnFindFile(stater Stater) template.Rule {
-	return func(path []interface{}, node interface{}) (interface{}, interface{}){
+	return func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		argsInterface, ok := singleKey(node, "Fn::FindFile")
 		if !ok {

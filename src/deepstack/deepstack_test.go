@@ -1,9 +1,9 @@
 package deepstack
 
 import (
-	"testing"
-	"reflect"
 	"fallbackmap"
+	"reflect"
+	"testing"
 )
 
 func Test_Stack(t *testing.T) {
@@ -17,8 +17,8 @@ func Test_Stack(t *testing.T) {
 		"d": "two:d",
 	})
 
-	stack.Push( frameOne )
-	stack.Push( frameTwo )
+	stack.Push(frameOne)
+	stack.Push(frameTwo)
 
 	value, _ := stack.Get([]string{"a"})
 	if value != "two:a" {
@@ -55,7 +55,7 @@ func Test_Stack(t *testing.T) {
 		t.Fatalf("appended 'd' value still present after Pop")
 	}
 
-	stack.Push( fallbackmap.DeepMap(frameTwo) )
+	stack.Push(fallbackmap.DeepMap(frameTwo))
 
 	value, _ = stack.Get([]string{"a"})
 	if value != "two:a" {

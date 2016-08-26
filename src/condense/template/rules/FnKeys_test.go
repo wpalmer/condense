@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnKeys_Passthru_NonMatching(t *testing.T) {
@@ -50,7 +50,7 @@ func TestFnKeys_Basic(t *testing.T) {
 			t.Fatalf("FnKeys of %v returned a non-string key (%v)", input, v)
 		}
 
-		resultMap[ vString ] = true
+		resultMap[vString] = true
 	}
 
 	expected := map[string]bool{

@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestReduceConditions_Passthru_NonCondition(t *testing.T) {

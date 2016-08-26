@@ -1,11 +1,11 @@
 package rules
 
 import (
-	"testing"
-	"reflect"
 	"condense/template"
 	"deepstack"
 	"fallbackmap"
+	"reflect"
+	"testing"
 )
 
 func testMakeRef(stack deepstack.DeepStack, rules template.Rules) template.Rule {
@@ -57,11 +57,11 @@ func TestRef_Passthru_NonStringArguments(t *testing.T) {
 
 func TestRef_Basic(t *testing.T) {
 	stack := deepstack.DeepStack{}
-	stack.Push( fallbackmap.DeepMap(map[string]interface{}{
+	stack.Push(fallbackmap.DeepMap(map[string]interface{}{
 		"BoundVar": "BoundValue",
-	}) )
+	}))
 	templateRules := template.Rules{}
-	
+
 	expected := "BoundValue"
 
 	ref := MakeRef(&stack, &templateRules)

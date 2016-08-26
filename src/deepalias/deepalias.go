@@ -42,7 +42,7 @@ func Split(pathString string) []string {
 func DeAlias(path []string, deep fallbackmap.Deep) ([]string, bool) {
 	did_translate := false
 	translated := []string{}
-	for _, component := range(path) {
+	for _, component := range path {
 		if strings.HasPrefix(component, "[") && strings.HasSuffix(component, "]") {
 			alias_path := strings.Split(component[1:len(component)-1], ".")
 			dereferenced_component, found := deep.Get(alias_path)

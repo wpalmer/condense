@@ -2,8 +2,8 @@ package rules
 
 import (
 	"condense/template"
-	"testing"
 	"reflect"
+	"testing"
 
 	"golang.org/x/tools/godoc/vfs/mapfs"
 )
@@ -89,16 +89,18 @@ func TestMakeFnIncludeFile_NoTemplateRules(t *testing.T) {
 
 func TestMakeFnIncludeFile_BasicRule(t *testing.T) {
 	templateRules := template.Rules{}
-	templateRules.Attach( func(path []interface{}, node interface{}) (interface{}, interface{}) {
+	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		if key == "content" {
 			return key, interface{}("replaced")
 		}
 
 		return key, node
-	} )
+	})
 
 	fs := mapfs.New(map[string]string{"a": "{\"content\": 1}"})
 	fnIncludeFile := MakeFnIncludeFile(fs, &templateRules)

@@ -1,15 +1,17 @@
 package rules
 
 import (
+	"condense/template"
 	"deepstack"
 	"fallbackmap"
-	"condense/template"
 )
 
 func MakeFnFor(sources *deepstack.DeepStack, templateRules *template.Rules) template.Rule {
-	return func (path []interface{}, node interface{}) (interface{}, interface{}) {
+	return func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		raw, ok := singleKey(node, "Fn::For")
 		if !ok {
@@ -18,8 +20,8 @@ func MakeFnFor(sources *deepstack.DeepStack, templateRules *template.Rules) temp
 
 		args, ok := collectArgs(
 			raw,
-			func(argsSoFar []interface{}) bool { return len(argsSoFar) < 3; },
-			func(argsSoFar []interface{}, arg interface{}) (skip bool, newNode interface{}){
+			func(argsSoFar []interface{}) bool { return len(argsSoFar) < 3 },
+			func(argsSoFar []interface{}, arg interface{}) (skip bool, newNode interface{}) {
 				// unconditionally process the argument, in case it needs to be skipped
 				key, node := template.Walk(path, arg, templateRules)
 				if skip, ok := key.(bool); ok && skip {
@@ -69,11 +71,11 @@ func MakeFnFor(sources *deepstack.DeepStack, templateRules *template.Rules) temp
 		for deepIndex, value := range values {
 			refMap := make(map[string]interface{})
 			if refNames[0] != nil {
-				refMap[ refNames[0].(string) ] = float64(deepIndex)
+				refMap[refNames[0].(string)] = float64(deepIndex)
 			}
 
 			if refNames[1] != nil {
-				refMap[ refNames[1].(string) ] = value
+				refMap[refNames[1].(string)] = value
 			}
 
 			deepPath := make([]interface{}, len(path)+1)

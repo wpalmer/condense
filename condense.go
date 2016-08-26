@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"golang.org/x/tools/godoc/vfs"
-	"lazymap"
 	"io"
+	"lazymap"
 	"os"
 	"strings"
 
@@ -110,7 +110,7 @@ func (f *InputsFlag) Set(parametersFilename string) (err error) {
 	return nil
 }
 
-func (f *InputsFlag) Sources() ([]inputSource) {
+func (f *InputsFlag) Sources() []inputSource {
 	return f.sources
 }
 
@@ -123,9 +123,9 @@ const (
 )
 
 type OutputWhatFlag struct {
-	what OutputWhat
+	what   OutputWhat
 	hasKey bool
-	key  string
+	key    string
 }
 
 func (f OutputWhatFlag) Get() OutputWhatFlag {
@@ -161,7 +161,7 @@ func (f *OutputWhatFlag) Set(input string) error {
 	case "parameters":
 		f.what = OutputParameters
 	case "credentials":
-			f.what = OutputCredentials
+		f.what = OutputCredentials
 	default:
 		return fmt.Errorf("Unknown -output `%s' requested", input)
 	}
@@ -260,7 +260,9 @@ func main() {
 	stack.Push(fallbackmap.DeepMap(parameterRefs))
 	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		if nodeMap, ok := node.(map[string]interface{}); !ok || len(nodeMap) != 1 {
 			return key, node //passthru

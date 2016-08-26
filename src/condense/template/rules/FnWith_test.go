@@ -4,8 +4,8 @@ import (
 	"condense/template"
 	"deepstack"
 	"fallbackmap"
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func testMakeFnWith(stack deepstack.DeepStack, rules template.Rules) template.Rule {
@@ -50,7 +50,7 @@ func TestFnWith_Passthru_NonMapBindings(t *testing.T) {
 	fnWith := testMakeFnWith(deepstack.DeepStack{}, template.Rules{})
 
 	input := interface{}(map[string]interface{}{
-		"Fn::With": []interface{}{ "nonMap", "aTemplate" },
+		"Fn::With": []interface{}{"nonMap", "aTemplate"},
 	})
 
 	newKey, newNode := fnWith([]interface{}{"x", "y"}, input)
@@ -67,7 +67,7 @@ func TestFnWith_NoTemplateRules(t *testing.T) {
 	fnWith := testMakeFnWith(deepstack.DeepStack{}, template.Rules{})
 
 	input := interface{}(map[string]interface{}{
-		"Fn::With": []interface{}{ map[string]interface{}{"a": "one"}, "aTemplate" },
+		"Fn::With": []interface{}{map[string]interface{}{"a": "one"}, "aTemplate"},
 	})
 
 	expected := interface{}("aTemplate")
@@ -84,16 +84,18 @@ func TestFnWith_NoTemplateRules(t *testing.T) {
 func TestFnWith_BasicRule(t *testing.T) {
 	stack := deepstack.DeepStack{}
 	templateRules := template.Rules{}
-	templateRules.Attach( func(path []interface{}, node interface{}) (interface{}, interface{}) {
+	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		return key, interface{}(map[string]interface{}{"a": "one"})
-	} )
-	
+	})
+
 	fnWith := MakeFnWith(&stack, &templateRules)
 	input := interface{}(map[string]interface{}{
-		"Fn::With": []interface{}{ map[string]interface{}{"a": "one"}, "aTemplate" },
+		"Fn::With": []interface{}{map[string]interface{}{"a": "one"}, "aTemplate"},
 	})
 
 	expected := interface{}(map[string]interface{}{"a": "one"})
@@ -110,9 +112,11 @@ func TestFnWith_BasicRule(t *testing.T) {
 func TestFnWith_PreProcessArgs(t *testing.T) {
 	stack := deepstack.DeepStack{}
 	templateRules := template.Rules{}
-	templateRules.Attach( func(path []interface{}, node interface{}) (interface{}, interface{}) {
+	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		aString, ok := node.(string)
 		if !ok {
@@ -137,11 +141,11 @@ func TestFnWith_PreProcessArgs(t *testing.T) {
 		}
 
 		return key, node
-	} )
-	
+	})
+
 	fnWith := MakeFnWith(&stack, &templateRules)
 	input := interface{}(map[string]interface{}{
-		"Fn::With": []interface{}{ "skip", "values", "skip", "template", "skip" },
+		"Fn::With": []interface{}{"skip", "values", "skip", "template", "skip"},
 	})
 
 	expected := "processed-template"
@@ -157,34 +161,36 @@ func TestFnWith_PreProcessArgs(t *testing.T) {
 
 func TestFnWith_StackWithArray(t *testing.T) {
 	stack := deepstack.DeepStack{}
-	stack.Push( fallbackmap.DeepMap(map[string]interface{}{"outer": "outer-value", "masked": "masked-value"}) )
+	stack.Push(fallbackmap.DeepMap(map[string]interface{}{"outer": "outer-value", "masked": "masked-value"}))
 
 	input := interface{}(map[string]interface{}{
 		"Fn::With": []interface{}{
 			map[string]interface{}{
 				"masked": "masking-value",
-				"inner": "inner-value",
+				"inner":  "inner-value",
 			},
 			map[string]interface{}{
-				"outer": "replace-with-outer",
-				"masked": "replace-with-masked",
-				"inner": "replace-with-inner",
+				"outer":     "replace-with-outer",
+				"masked":    "replace-with-masked",
+				"inner":     "replace-with-inner",
 				"untouched": "stay-the-same",
 			},
 		},
 	})
 
 	expected := interface{}(map[string]interface{}{
-		"outer": "outer-value",
-		"masked": "masking-value",
-		"inner": "inner-value",
+		"outer":     "outer-value",
+		"masked":    "masking-value",
+		"inner":     "inner-value",
 		"untouched": "stay-the-same",
 	})
 
 	templateRules := template.Rules{}
-	templateRules.Attach( func(path []interface{}, node interface{}) (interface{}, interface{}) {
+	templateRules.Attach(func(path []interface{}, node interface{}) (interface{}, interface{}) {
 		key := interface{}(nil)
-		if len(path) > 0 { key = path[len(path)-1] }
+		if len(path) > 0 {
+			key = path[len(path)-1]
+		}
 
 		newNode := make(map[string]interface{})
 		if nodeMap, ok := node.(map[string]interface{}); ok {
@@ -202,7 +208,7 @@ func TestFnWith_StackWithArray(t *testing.T) {
 		}
 
 		return key, node
-	} )
+	})
 
 	fnWith := MakeFnWith(&stack, &templateRules)
 	newKey, newNode := fnWith([]interface{}{"x", "y"}, input)

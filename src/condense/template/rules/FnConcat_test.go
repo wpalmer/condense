@@ -1,8 +1,8 @@
 package rules
 
 import (
-	"testing"
 	"reflect"
+	"testing"
 )
 
 func TestFnConcat_Passthru_NonMatching(t *testing.T) {
@@ -16,7 +16,7 @@ func TestFnConcat_Passthru_NonArgsList(t *testing.T) {
 func TestFnConcat_Passthru_NonArray(t *testing.T) {
 	input := interface{}(map[string]interface{}{
 		"Fn::Concat": []interface{}{
-			[]interface{}{1,2},
+			[]interface{}{1, 2},
 			3,
 		},
 	})
@@ -33,15 +33,15 @@ func TestFnConcat_Passthru_NonArray(t *testing.T) {
 
 func TestFnConcat_Basic(t *testing.T) {
 	testData := [][]interface{}{
-		[]interface{}{ []interface{}{1,2} },
-		[]interface{}{ []interface{}{1,2}, []interface{}{3,4} },
-		[]interface{}{ []interface{}{1,2}, []interface{}{3}, []interface{}{4,5} },
+		[]interface{}{[]interface{}{1, 2}},
+		[]interface{}{[]interface{}{1, 2}, []interface{}{3, 4}},
+		[]interface{}{[]interface{}{1, 2}, []interface{}{3}, []interface{}{4, 5}},
 	}
 
 	expected := []interface{}{
-		[]interface{}{1,2},
-		[]interface{}{1,2,3,4},
-		[]interface{}{1,2,3,4,5},
+		[]interface{}{1, 2},
+		[]interface{}{1, 2, 3, 4},
+		[]interface{}{1, 2, 3, 4, 5},
 	}
 
 	for i := range testData {

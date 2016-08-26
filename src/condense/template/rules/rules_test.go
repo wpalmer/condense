@@ -1,13 +1,13 @@
 package rules
 
 import (
-	"testing"
-	"reflect"
 	"condense/template"
+	"reflect"
+	"testing"
 )
 
 func testdataInputTypes() []interface{} {
-	return []interface{} {
+	return []interface{}{
 		interface{}("aString"),
 		interface{}(true),
 		interface{}(1),
@@ -25,10 +25,10 @@ func testdataInputTypes() []interface{} {
 		}),
 		interface{}(map[string]interface{}{
 			"string": interface{}("aString"),
-			"bool": interface{}(true),
-			"int": interface{}(1),
-			"float": interface{}(1.0),
-			"nil": interface{}(nil),
+			"bool":   interface{}(true),
+			"int":    interface{}(1),
+			"float":  interface{}(1.0),
+			"nil":    interface{}(nil),
 			"array": interface{}([]interface{}{
 				interface{}("aString"),
 				interface{}(true),
