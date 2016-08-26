@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/cloudformation"
 	"golang.org/x/tools/godoc/vfs"
+	"lazymap"
 	"io"
 	"os"
 	"strings"
@@ -27,13 +28,18 @@ type inputSource struct {
 type InputsFlag struct {
 	inputs  *fallbackmap.FallbackMap
 	sources []inputSource
+	rules   *template.Rules
+}
+
+func NewInputsFlag(rules *template.Rules) InputsFlag {
+	return InputsFlag{
+		&fallbackmap.FallbackMap{},
+		[]inputSource{},
+		rules,
+	}
 }
 
 func (f *InputsFlag) Get() *fallbackmap.FallbackMap {
-	if f.inputs == nil {
-		f.inputs = &fallbackmap.FallbackMap{}
-	}
-
 	return f.inputs
 }
 
@@ -90,10 +96,6 @@ func (f *InputsFlag) Set(parametersFilename string) (err error) {
 			return fmt.Errorf("JSON data does not decode into a map or array of maps")
 		}
 
-		if f.inputs == nil {
-			f.inputs = &fallbackmap.FallbackMap{}
-		}
-
 		var parametersFilespec string
 		if len(ins) == 1 {
 			parametersFilespec = parametersFilename
@@ -101,7 +103,7 @@ func (f *InputsFlag) Set(parametersFilename string) (err error) {
 			parametersFilespec = fmt.Sprintf("%s[%d]", parametersFilename, i)
 		}
 
-		f.inputs.Override(fallbackmap.DeepMap(in))
+		f.inputs.Override(lazymap.NewLazyMap(fallbackmap.DeepMap(in), f.rules))
 		f.sources = append(f.sources, inputSource{filename: parametersFilespec, data: in})
 	}
 
@@ -168,9 +170,10 @@ func (f *OutputWhatFlag) Set(input string) error {
 }
 
 func main() {
+	templateRules := template.Rules{}
+	inputParameters := NewInputsFlag(&templateRules)
 	var templateFilename string
 	var outputWhat OutputWhatFlag
-	var inputParameters InputsFlag
 
 	flag.StringVar(&templateFilename,
 		"template", "-",
@@ -203,8 +206,6 @@ func main() {
 
 	sources := fallbackmap.FallbackMap{}
 	stack := deepstack.DeepStack{}
-
-	templateRules := template.Rules{}
 
 	sources.Attach(inputParameters.Get())
 	sources.Attach(deepalias.DeepAlias{&stack})
