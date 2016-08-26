@@ -1,14 +1,48 @@
 package fallbackmap
 
+import (
+	"reflect"
+)
+
 type Deep interface {
 	Get(path []string) (value interface{}, has_key bool)
 }
 
 type DeepMap map[string]interface{}
 type DeepFunc func(path []string) (value interface{}, has_key bool)
+type DeepSingle struct {
+	path []string
+	value interface{}
+}
 
 func (deep DeepFunc) Get(path []string) (value interface{}, has_key bool) {
 	return deep(path)
+}
+
+func NewDeepSingle(path []string, value interface{}) DeepSingle {
+	return DeepSingle {path, value}
+}
+
+func (deep DeepSingle) Get(path []string) (value interface{}, has_key bool) {
+	if reflect.DeepEqual(path, deep.path) {
+		return deep.value, true
+	}
+
+	if len(path) < len(deep.path) {
+		return nil, false
+	}
+
+	if reflect.DeepEqual(path[:len(deep.path)], deep.path) {
+		var next map[string]interface{}
+		var ok bool
+
+		next, ok = deep.value.(map[string]interface{})
+		if ok {
+			return DeepMap(next).Get(path[len(deep.path):])
+		}
+	}
+
+	return nil, false
 }
 
 func (deep DeepMap) Get(path []string) (value interface{}, has_key bool) {

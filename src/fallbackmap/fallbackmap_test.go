@@ -2,33 +2,33 @@ package fallbackmap
 
 import "testing"
 
-func testGetInt(i *FallbackMap, path []string, value int, t *testing.T) {
+func testGetInt(i Deep, path []string, value int, t *testing.T) {
 	v, ok := i.Get(path)
 	if !ok {
 		t.Fatalf("getting of %v did not return a result", path)
 	}
-	
+
 	vi, ok := v.(int)
 	if !ok {
 		t.Fatalf("getting of %v did not return an int (got %v instead)", path, v)
 	}
-	
+
 	if vi != value {
 		t.Fatalf("getting of %v did not return expected result (%v)", path, value)
 	}
 }
 
-func testGetString(i *FallbackMap, path []string, value string, t *testing.T) {
+func testGetString(i Deep, path []string, value string, t *testing.T) {
 	v, ok := i.Get(path)
 	if !ok {
 		t.Fatalf("getting of %v did not return a result", path)
 	}
-	
+
 	vs, ok := v.(string)
 	if !ok {
 		t.Fatalf("getting of %v did not return an string (got %v instead)", path, v)
 	}
-	
+
 	if vs != value {
 		t.Fatalf("getting of %v did not return expected result (%v)", path, value)
 	}
@@ -92,12 +92,12 @@ func TestAttach(t *testing.T) {
 		"foo": 1,
 		"bar": 2,
 	})}}
-	
+
 	o := map[string]interface{}{
 		"bar": 3,
 		"baz": 4,
 	}
-	
+
 	i.Attach(DeepMap(o))
 
 	testGetInt(i, []string{"foo"}, 1, t)
@@ -135,6 +135,31 @@ func TestDeepAttach(t *testing.T) {
 	testGetString(i,
 		[]string{"aStack", "Outputs", "nonOverriddenOutputValue"},
 		"never-tried-to-override",
+		t,
+	)
+}
+
+func TestDeepSingle(t *testing.T) {
+	deepSingle := NewDeepSingle([]string{"xx", "yy"}, map[string]interface{}{
+		"a": "aValue",
+		"b": "bValue",
+	})
+
+	testGetString(&deepSingle,
+		[]string{"xx", "yy", "a"},
+		"aValue",
+		t,
+	)
+
+	testGetString(&deepSingle,
+		[]string{"xx", "yy", "a"},
+		"aValue",
+		t,
+	)
+
+	testGetString(&deepSingle,
+		[]string{"xx", "yy", "b"},
+		"bValue",
 		t,
 	)
 }
