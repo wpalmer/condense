@@ -20,11 +20,11 @@ func TestReduceConditions_Passthru_NonCondition(t *testing.T) {
 		newKey, newNode := ReduceConditions(path, input)
 
 		if newKey != path[len(path)-1] {
-			t.Fatalf("ReduceConditions on a non-Condition node modified the path (%v instead of %v)", singleKey, newKey, path[len(path)-1])
+			t.Fatalf("ReduceConditions on a non-Condition node modified the path (%v instead of %v)", newKey, path[len(path)-1])
 		}
 
 		if !reflect.DeepEqual(newNode, input) {
-			t.Fatalf("ReduceConditions on a non-Condition node modified the data (%v instead of %v)", singleKey, newNode, input)
+			t.Fatalf("ReduceConditions on a non-Condition node modified the data (%v instead of %v)", newNode, input)
 		}
 	}
 }
@@ -34,11 +34,11 @@ func TestReduceConditions_Passthru_NonBool(t *testing.T) {
 	newKey, newNode := ReduceConditions([]interface{}{"Conditions", "Foo"}, input)
 
 	if newKey != "Foo" {
-		t.Fatalf("ReduceConditions on a non-bool node modified the path (%v instead of %v)", singleKey, newKey, "Foo")
+		t.Fatalf("ReduceConditions on a non-bool node modified the path (%v instead of %v)", newKey, "Foo")
 	}
 
 	if !reflect.DeepEqual(newNode, input) {
-		t.Fatalf("ReduceConditions on a non-bool node modified the data (%v instead of %v)", singleKey, newNode, input)
+		t.Fatalf("ReduceConditions on a non-bool node modified the data (%v instead of %v)", newNode, input)
 	}
 }
 

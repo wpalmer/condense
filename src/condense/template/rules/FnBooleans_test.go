@@ -30,7 +30,7 @@ func TestFnIf_Passthru_WrongNumberOfArguments(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(newNode, input) {
-			t.Fatalf("FnIf of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
+			t.Fatalf("FnIf of wrong-sized args-list %v modified the data (%v instead of %v)", input, newNode, input)
 		}
 	}
 }
@@ -98,7 +98,7 @@ func TestFnEquals_Passthru_WrongNumberOfArguments(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(newNode, input) {
-			t.Fatalf("FnEquals of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
+			t.Fatalf("FnEquals of wrong-sized args-list %v modified the data (%v instead of %v)", input, newNode, input)
 		}
 	}
 }
@@ -159,7 +159,7 @@ func TestFnAnd_Passthru_WrongNumberOfArguments(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(newNode, input) {
-		t.Fatalf("FnAnd of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
+		t.Fatalf("FnAnd of wrong-sized args-list %v modified the data (%v instead of %v)", input, newNode, input)
 	}
 }
 
@@ -252,7 +252,7 @@ func TestFnOr_Passthru_WrongNumberOfArguments(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(newNode, input) {
-		t.Fatalf("FnOr of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
+		t.Fatalf("FnOr of wrong-sized args-list %v modified the data (%v instead of %v)", input, newNode, input)
 	}
 }
 

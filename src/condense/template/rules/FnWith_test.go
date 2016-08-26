@@ -41,7 +41,7 @@ func TestFnWith_Passthru_WrongNumberOfArguments(t *testing.T) {
 		}
 
 		if !reflect.DeepEqual(newNode, input) {
-			t.Fatalf("FnWith of wrong-sized args-list %v modified the data (%v instead of %v)", newNode, input)
+			t.Fatalf("FnWith of wrong-sized args-list %v modified the data (%v instead of %v)", input, newNode, input)
 		}
 	}
 }
