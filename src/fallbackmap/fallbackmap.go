@@ -15,6 +15,10 @@ type DeepSingle struct {
 	value interface{}
 }
 
+var DeepNil = DeepFunc(func(path []string) (value interface{}, has_key bool){
+	return nil, false
+})
+
 func (deep DeepFunc) Get(path []string) (value interface{}, has_key bool) {
 	return deep(path)
 }
