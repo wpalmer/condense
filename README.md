@@ -178,6 +178,25 @@ Outputs:
 true
 ```
 
+### FnHasRef
+
+Returns a Boolean indicating whether or not the specified Reference
+can be resolved by the processor, eg:
+```json
+{"Fn::With": [
+  {"needle": "aValue"},
+  [
+    {"Fn::HasRef": "needle"},
+    {"Fn::HasRef": "nonexistant"},
+  ]
+]}
+```
+
+Outputs:
+```json
+[true,false]
+```
+
 ### FnIncludeFile
 
 Reference an external file, adding it (as its JSON interpretation) to the

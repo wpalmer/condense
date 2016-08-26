@@ -237,6 +237,7 @@ func main() {
 	templateRules.Attach(rules.FnUnique)
 	templateRules.Attach(rules.MakeFnGetAtt(&stack, &templateRules))
 	templateRules.Attach(rules.MakeRef(&stack, &templateRules))
+	templateRules.Attach(rules.MakeFnHasRef(&stack))
 	templateRules.Attach(rules.MakeFnIncludeFile(vfs.OS("/"), &templateRules))
 	templateRules.Attach(rules.MakeFnIncludeFileRaw(vfs.OS("/")))
 	templateRules.Attach(rules.ReduceConditions)
