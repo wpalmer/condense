@@ -36,12 +36,14 @@ func TestFnConcat_Basic(t *testing.T) {
 		[]interface{}{[]interface{}{1, 2}},
 		[]interface{}{[]interface{}{1, 2}, []interface{}{3, 4}},
 		[]interface{}{[]interface{}{1, 2}, []interface{}{3}, []interface{}{4, 5}},
+		[]interface{}{[]interface{}{}, []interface{}{}, []interface{}{}},
 	}
 
 	expected := []interface{}{
 		[]interface{}{1, 2},
 		[]interface{}{1, 2, 3, 4},
 		[]interface{}{1, 2, 3, 4, 5},
+		[]interface{}{},
 	}
 
 	for i := range testData {

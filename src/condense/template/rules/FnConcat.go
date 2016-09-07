@@ -16,7 +16,7 @@ func FnConcat(path []interface{}, node interface{}) (interface{}, interface{}) {
 		return key, node //passthru
 	}
 
-	var concatenated []interface{}
+	concatenated := []interface{}{}
 	for _, argInterface := range args {
 		var argArray []interface{}
 		if argArray, ok = argInterface.([]interface{}); !ok {
